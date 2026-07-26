@@ -8,30 +8,22 @@
 <style>
 :root{--b:#173f5f;--b2:#2d6d8d;--bg:#f3f6f8;--c:#fff;--t:#17212b;--m:#667784;--bd:#d9e2e7;--ok:#14734b;--bad:#b3261e;--purple:#6f42c1}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--b),var(--b2));color:#fff;padding:18px 16px}
-header h1{margin:0;font-size:1.25rem}header small{opacity:.85}
-main{max-width:760px;margin:auto;padding:14px 14px 92px}
-.card{background:var(--c);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 20px #18394b12}
-.hero{background:linear-gradient(135deg,var(--b),var(--b2));color:#fff}.hero h2{margin:0 0 5px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.btn{border:0;border-radius:14px;padding:12px;font-weight:800;background:#eaf0f4;color:var(--b)}
-.btn.primary{background:var(--b);color:#fff}.btn.danger{background:#fdecea;color:var(--bad)}.btn.small{padding:8px 10px;font-size:.82rem}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,var(--b),var(--b2));color:#fff;padding:18px 16px}header h1{margin:0;font-size:1.25rem}header small{opacity:.85}
+main{max-width:760px;margin:auto;padding:14px 14px 92px}.card{background:var(--c);border:1px solid var(--bd);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 20px #18394b12}
+.hero{background:linear-gradient(135deg,var(--b),var(--b2));color:#fff}.hero h2{margin:0 0 5px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.btn{border:0;border-radius:14px;padding:12px;font-weight:800;background:#eaf0f4;color:var(--b)}.btn.primary{background:var(--b);color:#fff}.btn.danger{background:#fdecea;color:var(--bad)}.btn.small{padding:8px 10px;font-size:.82rem}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:#fffffff5;border-top:1px solid var(--bd);padding:7px 6px calc(7px + env(safe-area-inset-bottom));z-index:10}
 nav button{border:0;background:transparent;color:var(--m);padding:7px 2px;font-size:.68rem}nav button b{display:block;font-size:1.1rem}nav button.on{color:var(--b);font-weight:900;background:#edf3f6;border-radius:12px}
-h2,h3{margin:0 0 8px}.muted{color:var(--m)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.wrap{flex-wrap:wrap}
-.weeknav{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px}.weeknav button{height:42px;border:1px solid var(--bd);background:#fff;border-radius:12px}.weeknav div{text-align:center;font-weight:900}
-.dept{border-left:5px solid var(--b)}.dept.carni{border-left-color:#8a5a2b}.cr{border-left:5px solid var(--purple);background:#faf7ff}
-.shift{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--bd)}.shift:first-of-type{border-top:0}.time{font-weight:900}.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#edf3f6;color:var(--b);font-size:.7rem;margin:3px 3px 0 0}
-.total{font-weight:900}.bad{color:var(--bad)}.ok{color:var(--ok)}
-input,select{width:100%;padding:11px;border:1px solid var(--bd);border-radius:12px;background:#fff}label{display:grid;gap:5px;color:var(--m);font-size:.8rem;font-weight:750}
-.form{display:grid;gap:10px}.form.two{grid-template-columns:1fr 1fr}.emp{border-top:1px solid var(--bd);padding:10px 0}.emp:first-child{border:0}
-.hidden{display:none!important}.redbox{background:#fff6f5;border-color:#efaaa5}
+h2,h3{margin:0 0 8px}.muted{color:var(--m)}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.weeknav{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px}.weeknav button{height:42px;border:1px solid var(--bd);background:#fff;border-radius:12px}.weeknav div{text-align:center;font-weight:900}
+.dept{border-left:5px solid var(--b)}.dept.carni{border-left-color:#8a5a2b}.cr{border-left:5px solid var(--purple);background:#faf7ff}.cr .pill{background:#eee5ff;color:var(--purple)}
+.shift{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:9px 0;border-top:1px solid var(--bd)}.shift:first-of-type{border-top:0}.time{font-weight:900}.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#edf3f6;color:var(--b);font-size:.7rem;margin:3px 3px 0 0}.total{font-weight:900}.bad{color:var(--bad)}.ok{color:var(--ok)}
+input,select{width:100%;padding:11px;border:1px solid var(--bd);border-radius:12px;background:#fff}label{display:grid;gap:5px;color:var(--m);font-size:.8rem;font-weight:750}.form{display:grid;gap:10px}.form.two{grid-template-columns:1fr 1fr}.emp{border-top:1px solid var(--bd);padding:10px 0}.emp:first-child{border:0}.redbox{background:#fff6f5;border-color:#efaaa5}
 @media(max-width:460px){.form.two{grid-template-columns:1fr}.shift{grid-template-columns:1fr auto}.shift .edit{grid-column:2}.grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
-<header><h1>Orari Reparto</h1><small>Demo mobile</small></header>
-<main id="app"></main>
-<nav id="nav"></nav>
+<header><h1>Orari Reparto</h1><small>Demo mobile · logica CR aggiornata</small></header>
+<main id="app"></main><nav id="nav"></nav>
 <script>
 const DAYS=['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
 const SKILLS=['Forno','Ordini','Servizio','Macelleria','Pescheria'];
@@ -45,69 +37,54 @@ const baseEmployees=[
 {name:'Paola',hours:20,skills:{Forno:1,Ordini:0,Servizio:3,Macelleria:0,Pescheria:0}},
 {name:'Michele',hours:36,skills:{Forno:0,Ordini:0,Servizio:1,Macelleria:3,Pescheria:2}}
 ];
-const defaults={employees:baseEmployees,objectives:{gastronomia:215,carni:50,total:265,prodG:0,prodC:0,rottG:0,rottGE:0,rottC:0,rottCE:0,diffG:0,diffGE:0,diffC:0,diffCE:0},leaves:[],edits:{}};
-let S=JSON.parse(localStorage.getItem('orari_demo_pub')||'null')||defaults;
+const defaults={schemaVersion:2,employees:baseEmployees,objectives:{gastronomia:215,carni:50,total:265,prodG:0,prodC:0,rottG:0,rottGE:0,rottC:0,rottCE:0,diffG:0,diffGE:0,diffC:0,diffCE:0},leaves:[],edits:{}};
+const OLD='orari_demo_pub',STORE='orari_demo_pub_v2';
+let S=JSON.parse(localStorage.getItem(STORE)||'null')||JSON.parse(localStorage.getItem(OLD)||'null')||defaults;
 S=Object.assign({},defaults,S);S.objectives=Object.assign({},defaults.objectives,S.objectives);
+if(S.schemaVersion!==2){S.schemaVersion=2;S.edits={};localStorage.setItem(STORE,JSON.stringify(S))}
 let view='home',week=mon(new Date());
-const $=s=>document.querySelector(s), key=d=>d.toISOString().slice(0,10), add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x}, fmt=d=>d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+const $=s=>document.querySelector(s),key=d=>d.toISOString().slice(0,10),add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x},fmt=d=>d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
 function mon(d){d=new Date(d);d.setHours(12,0,0,0);let n=d.getDay();d.setDate(d.getDate()+(n===0?-6:1-n));return d}
-function save(){localStorage.setItem('orari_demo_pub',JSON.stringify(S))}
+function save(){localStorage.setItem(STORE,JSON.stringify(S))}
 function mins(t){let[a,b]=t.split(':').map(Number);return a*60+b}
 function hrs(a,b,p=0){return (mins(b)-mins(a)-p)/60}
 function html(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function onLeave(name,d){let k=key(d);return S.leaves.some(x=>x.name===name&&k>=x.from&&k<=x.to)}
 function staff(){return S.employees.filter(e=>!e.cr)}
 function choose(skill,d,used,offset=0){let c=staff().filter(e=>!onLeave(e.name,d)&&(e.skills[skill]||0)>0).sort((a,b)=>(b.skills[skill]||0)-(a.skills[skill]||0)||((used[a.name]||0)-(used[b.name]||0)));if(!c.length)c=staff().filter(e=>!onLeave(e.name,d));let x=c[offset%c.length];if(x)used[x.name]=(used[x.name]||0)+1;return x?.name||'SCOPERTO'}
-function crShifts(i){
-const arr=[
-['06:00','13:30','Apertura / parzialmente operativo'],
-['06:00','13:00','Apertura / parzialmente operativo','14:00','15:30'],
-['16:00','20:45','Presidio chiusura'],
-['06:30','13:30','Parzialmente operativo'],
-['06:00','13:30','Apertura / parzialmente operativo'],
-['09:30','13:30','Presidio','16:30','20:45'],
-null];return arr[i]}
-function buildWeek(){
-let used={},out=[];
-for(let i=0;i<7;i++){let d=add(week,i),day={date:d,g:[],c:[],cr:null};
-let cr=crShifts(i);if(cr&&!onLeave(S.employees.find(e=>e.cr)?.name||'Giulio CR',d))day.cr={name:S.employees.find(e=>e.cr)?.name||'Giulio CR',start:cr[0],end:cr[1],note:cr[2],start2:cr[3],end2:cr[4]};
-if(i<6){
-let defs=[['06:15','13:00','Forno'],['06:30','13:30','Ordini'],['09:30','13:30','Servizio'],['13:30','20:45','Chiusura'],['16:30','20:45','Chiusura']];
-if(i===5)defs.push(['09:30','13:30','Servizio'],['13:00','17:30','Servizio']);
-defs.forEach((x,j)=>day.g.push({name:choose(x[2]==='Chiusura'?'Servizio':x[2],d,used,j%2),start:x[0],end:x[1],skill:x[2],pause:(x[1]==='20:45'&&x[0]==='13:30')?15:0}));
-}else{
-[['07:00','13:30','Forno'],['07:00','13:30','Servizio'],['07:45','13:30','Servizio']].forEach((x,j)=>day.g.push({name:choose(x[2],d,used,j),start:x[0],end:x[1],skill:x[2],pause:15}));
-}
-const carni=[
-[['06:30','13:30','Macelleria']],
-[['07:00','13:15','Macelleria']],
-[['06:30','13:30','Macelleria']],
-[['07:00','13:15','Macelleria']],
-[['06:30','13:30','Macelleria'],['06:30','13:30','Pescheria']],
-[['06:30','13:30','Macelleria'],['15:00','18:00','Rifornimento']],
-[['07:00','08:00','Ripristino carne/pesce']]
-][i];
-carni.forEach((x,j)=>day.c.push({name:choose(x[2]==='Rifornimento'?'Servizio':(x[2].includes('Pesce')?'Pescheria':'Macelleria'),d,used,j),start:x[0],end:x[1],skill:x[2],pause:hrs(x[0],x[1])>6?15:0}));
-out.push(day)}
-return out}
+function crShift(i){return[
+{start:'06:00',end:'13:30',note:'Apertura · copre il terzo servizio',mode:'morning',pause:15},
+{start:'06:00',end:'13:00',start2:'14:00',end2:'15:30',note:'Apertura e assistenza pomeridiana · copre il terzo servizio',mode:'morning',pause:15},
+{start:'13:30',end:'20:45',note:'Solo turno serale · solo dalle 13:30 alle 16:30',mode:'evening',pause:15},
+{start:'06:30',end:'13:30',note:'Mattina · copre il terzo servizio',mode:'morning',pause:15},
+{start:'06:00',end:'13:30',note:'Apertura · copre il terzo servizio',mode:'morning',pause:15},
+{start:'09:30',end:'13:30',start2:'16:30',end2:'20:45',note:'Spezzato · copre il servizio mattutino e presidia la chiusura',mode:'split',pause:0},
+null][i]}
+function buildWeek(){let used={},out=[];for(let i=0;i<7;i++){let d=add(week,i),day={date:d,g:[],c:[],cr:null};let cr=crShift(i),crName=S.employees.find(e=>e.cr)?.name||'Giulio CR';if(cr&&!onLeave(crName,d))day.cr={name:crName,...cr};
+if(i<6){let defs=[['06:15','13:00','Forno'],['06:30','13:30','Ordini']];
+const crCoversMorning=day.cr&&(day.cr.mode==='morning'||day.cr.mode==='split');
+if(!crCoversMorning)defs.push(['09:30','13:30','Servizio']);
+if(day.cr&&day.cr.mode==='evening'){defs.push(['16:30','20:45','Chiusura'],['16:30','20:45','Chiusura'])}else{defs.push(['13:30','20:45','Chiusura'],['16:30','20:45','Chiusura'])}
+if(i===5)defs.push(['09:30','13:30','Servizio · rinforzo sabato'],['13:00','17:30','Servizio · rinforzo sabato']);
+defs.forEach((x,j)=>day.g.push({name:choose(x[2].startsWith('Chiusura')||x[2].startsWith('Servizio')?'Servizio':x[2],d,used,j%2),start:x[0],end:x[1],skill:x[2],pause:(x[1]==='20:45'&&x[0]==='13:30')?15:0}));
+}else{[['07:00','13:30','Forno'],['07:00','13:30','Servizio'],['07:45','13:30','Servizio']].forEach((x,j)=>day.g.push({name:choose(x[2],d,used,j),start:x[0],end:x[1],skill:x[2],pause:15}))}
+const carni=[[['06:30','13:30','Macelleria']],[['07:00','13:15','Macelleria']],[['06:30','13:30','Macelleria']],[['07:00','13:15','Macelleria']],[['06:30','13:30','Macelleria'],['06:30','13:30','Pescheria']],[['06:30','13:30','Macelleria'],['15:00','18:00','Rifornimento']],[['07:00','08:00','Ripristino carne/pesce']]][i];
+carni.forEach((x,j)=>day.c.push({name:choose(x[2]==='Rifornimento'?'Servizio':(x[2].includes('Pesce')||x[2].includes('pesce')?'Pescheria':'Macelleria'),d,used,j),start:x[0],end:x[1],skill:x[2],pause:hrs(x[0],x[1])>6?15:0}));out.push(day)}return out}
 function applyEdits(days){days.forEach(day=>['g','c'].forEach(dep=>day[dep].forEach((s,i)=>{let e=S.edits[key(day.date)+'-'+dep+'-'+i];if(e)Object.assign(s,e)})));return days}
 function shiftHours(s){return hrs(s.start,s.end,s.pause||0)+(s.start2?hrs(s.start2,s.end2,0):0)}
 function weekTotals(days){let g=0,c=0,cr=0;days.forEach(d=>{d.g.forEach(s=>g+=shiftHours(s));d.c.forEach(s=>c+=shiftHours(s));if(d.cr)cr+=shiftHours(d.cr)});return{g,c,cr,total:g+c}}
 function nav(){let items=[['home','⌂','Home'],['schedule','▦','Orari'],['skills','✓','Competenze'],['leave','☀','Ferie'],['obj','◎','Obiettivi']];$('#nav').innerHTML=items.map(x=>`<button class="${view===x[0]?'on':''}" onclick="go('${x[0]}')"><b>${x[1]}</b>${x[2]}</button>`).join('')}
-function go(v){view=v;render()}
-function render(){nav();({home:home,schedule:schedule,skills:skills,leave:leave,obj:objectives}[view])()}
+function go(v){view=v;render()}function render(){nav();({home:home,schedule:schedule,skills:skills,leave:leave,obj:objectives}[view])()}
 function home(){let d=applyEdits(buildWeek()),t=weekTotals(d),over=t.total>S.objectives.total;$('#app').innerHTML=`<section class="card hero"><h2>Settimana in corso</h2><p>${fmt(week)} – ${fmt(add(week,6))}</p><p><b>${t.total.toFixed(2)} / ${S.objectives.total} ore reparti</b></p><button class="btn" onclick="go('schedule')">Apri orario</button></section><div class="grid"><button class="btn" onclick="go('schedule')">▦ Orari</button><button class="btn" onclick="go('skills')">✓ Competenze</button><button class="btn" onclick="go('leave')">☀ Ferie</button><button class="btn" onclick="go('obj')">◎ Obiettivi</button></div>${over?'<div class="card redbox bad"><b>Monte ore complessivo superato</b></div>':''}`}
 function shiftRow(s,d,dep,i){return `<div class="shift"><div><b>${html(s.name)}</b><br><span class="pill">${html(s.skill)}</span></div><div class="time">${s.start}–${s.end}${s.start2?`<br>${s.start2}–${s.end2}`:''}</div><button class="btn small edit" onclick="editShift('${key(d)}','${dep}',${i},'${html(s.name)}','${s.start}','${s.end}')">✎</button></div>`}
-function schedule(){let days=applyEdits(buildWeek()),t=weekTotals(days);$('#app').innerHTML=`<div class="card weeknav"><button onclick="move(-7)">‹</button><div>${fmt(week)} – ${fmt(add(week,6))}</div><button onclick="move(7)">›</button></div><div class="grid"><div class="card"><small>Gastronomia</small><div class="total ${t.g>S.objectives.gastronomia?'bad':''}">${t.g.toFixed(2)} / ${S.objectives.gastronomia} h</div></div><div class="card"><small>Carni</small><div class="total ${t.c>S.objectives.carni?'bad':''}">${t.c.toFixed(2)} / ${S.objectives.carni} h</div></div></div>${days.map((d,di)=>`<section class="card"><div class="row"><h3>${DAYS[di]} ${fmt(d.date)}</h3><b>${(d.g.reduce((a,s)=>a+shiftHours(s),0)+d.c.reduce((a,s)=>a+shiftHours(s),0)).toFixed(2)} h</b></div>${d.cr?`<div class="card cr"><b>${html(d.cr.name)} · CR</b><div>${d.cr.start}–${d.cr.end}${d.cr.start2?` / ${d.cr.start2}–${d.cr.end2}`:''}</div><small>${html(d.cr.note)} · ${shiftHours(d.cr).toFixed(2)} h</small></div>`:''}<div class="card dept"><h3>Gastronomia e forneria</h3>${d.g.map((s,i)=>shiftRow(s,d.date,'g',i)).join('')}<div class="total">Totale: ${d.g.reduce((a,s)=>a+shiftHours(s),0).toFixed(2)} h</div></div><div class="card dept carni"><h3>Carni e pescheria</h3>${d.c.map((s,i)=>shiftRow(s,d.date,'c',i)).join('')}<div class="total">Totale: ${d.c.reduce((a,s)=>a+shiftHours(s),0).toFixed(2)} h</div></div></section>`).join('')}`}
+function schedule(){let days=applyEdits(buildWeek()),t=weekTotals(days);$('#app').innerHTML=`<div class="card weeknav"><button onclick="move(-7)">‹</button><div>${fmt(week)} – ${fmt(add(week,6))}</div><button onclick="move(7)">›</button></div><div class="grid"><div class="card"><small>Gastronomia</small><div class="total ${t.g>S.objectives.gastronomia?'bad':''}">${t.g.toFixed(2)} / ${S.objectives.gastronomia} h</div></div><div class="card"><small>Carni</small><div class="total ${t.c>S.objectives.carni?'bad':''}">${t.c.toFixed(2)} / ${S.objectives.carni} h</div></div></div>${days.map((d,di)=>`<section class="card"><div class="row"><h3>${DAYS[di]} ${fmt(d.date)}</h3><b>${(d.g.reduce((a,s)=>a+shiftHours(s),0)+d.c.reduce((a,s)=>a+shiftHours(s),0)).toFixed(2)} h</b></div>${d.cr?`<div class="card cr"><b>${html(d.cr.name)} · CR</b><div class="time">${d.cr.start}–${d.cr.end}${d.cr.start2?` / ${d.cr.start2}–${d.cr.end2}`:''}</div><span class="pill">${html(d.cr.note)}</span><div><small>${shiftHours(d.cr).toFixed(2)} h</small></div></div>`:''}<div class="card dept"><h3>Gastronomia e forneria</h3>${d.g.map((s,i)=>shiftRow(s,d.date,'g',i)).join('')}<div class="total">Totale: ${d.g.reduce((a,s)=>a+shiftHours(s),0).toFixed(2)} h</div></div><div class="card dept carni"><h3>Carni e pescheria</h3>${d.c.map((s,i)=>shiftRow(s,d.date,'c',i)).join('')}<div class="total">Totale: ${d.c.reduce((a,s)=>a+shiftHours(s),0).toFixed(2)} h</div></div></section>`).join('')}`}
 function move(n){week=add(week,n);schedule()}
 function editShift(date,dep,i,name,start,end){let nn=prompt('Addetto',name);if(nn===null)return;let ns=prompt('Entrata',start);if(ns===null)return;let ne=prompt('Uscita',end);if(ne===null)return;S.edits[date+'-'+dep+'-'+i]={name:nn,start:ns,end:ne};save();schedule()}
 function skills(){$('#app').innerHTML=`<div class="card"><h2>Addetti e competenze</h2><p class="muted">Nomi e livelli sono modificabili.</p>${S.employees.map((e,i)=>`<div class="emp"><div class="row"><b>${html(e.name)} ${e.cr?'<span class="pill">CR</span>':''}</b><button class="btn small" onclick="rename(${i})">Rinomina</button></div><small>${e.hours} ore</small><div>${SKILLS.map(k=>`<span class="pill">${k}: ${e.skills[k]||0}</span>`).join('')}</div><button class="btn small" onclick="editSkills(${i})">Modifica competenze</button></div>`).join('')}<button class="btn primary" onclick="addEmp()">+ Aggiungi addetto</button></div>`}
-function rename(i){let n=prompt('Nuovo nome',S.employees[i].name);if(n){S.employees[i].name=n;save();skills()}}
-function editSkills(i){SKILLS.forEach(k=>{let v=prompt(`${k} (0-3)`,S.employees[i].skills[k]||0);if(v!==null)S.employees[i].skills[k]=Math.max(0,Math.min(3,Number(v)||0))});save();skills()}
+function rename(i){let n=prompt('Nuovo nome',S.employees[i].name);if(n){S.employees[i].name=n;save();skills()}}function editSkills(i){SKILLS.forEach(k=>{let v=prompt(`${k} (0-3)`,S.employees[i].skills[k]||0);if(v!==null)S.employees[i].skills[k]=Math.max(0,Math.min(3,Number(v)||0))});save();skills()}
 function addEmp(){let n=prompt('Nome addetto');if(!n)return;S.employees.push({name:n,hours:24,skills:Object.fromEntries(SKILLS.map(k=>[k,0]))});save();skills()}
 function leave(){$('#app').innerHTML=`<div class="card"><h2>Ferie</h2><form class="form" onsubmit="addLeave(event)"><label>Addetto<select id="ln">${S.employees.map(e=>`<option>${html(e.name)}</option>`).join('')}</select></label><div class="form two"><label>Dal<input id="lf" type="date" required></label><label>Al<input id="lt" type="date" required></label></div><button class="btn primary">Inserisci ferie</button></form></div>${S.leaves.map((x,i)=>`<div class="card row"><div><b>${html(x.name)}</b><br><small>${x.from} → ${x.to}</small></div><button class="btn danger small" onclick="delLeave(${i})">Elimina</button></div>`).join('')}`}
-function addLeave(e){e.preventDefault();S.leaves.push({name:$('#ln').value,from:$('#lf').value,to:$('#lt').value});save();schedule();view='schedule';render()}
-function delLeave(i){S.leaves.splice(i,1);save();leave()}
+function addLeave(e){e.preventDefault();S.leaves.push({name:$('#ln').value,from:$('#lf').value,to:$('#lt').value});save();view='schedule';render()}function delLeave(i){S.leaves.splice(i,1);save();leave()}
 function objectives(){let o=S.objectives;$('#app').innerHTML=`<form class="card form" onsubmit="saveObj(event)"><h2>Obiettivi reparto</h2><div class="form two"><label>Gastronomia ore<input id="og" type="number" step=".25" value="${o.gastronomia}"></label><label>Carni ore<input id="oc" type="number" step=".25" value="${o.carni}"></label></div><label>Totale reparti<input id="ot" type="number" step=".25" value="${o.total}"></label><h3>Gastronomia</h3><div class="form two"><label>Produttività €/ora<input id="pg" type="number" step=".01" value="${o.prodG}"></label><label>Rotture %<input id="rg" type="number" step=".01" value="${o.rottG}"></label><label>Rotture €<input id="rge" type="number" step=".01" value="${o.rottGE}"></label><label>Differenze %<input id="dg" type="number" step=".01" value="${o.diffG}"></label><label>Differenze €<input id="dge" type="number" step=".01" value="${o.diffGE}"></label></div><h3>Carni</h3><div class="form two"><label>Produttività €/ora<input id="pc" type="number" step=".01" value="${o.prodC}"></label><label>Rotture %<input id="rc" type="number" step=".01" value="${o.rottC}"></label><label>Rotture €<input id="rce" type="number" step=".01" value="${o.rottCE}"></label><label>Differenze %<input id="dc" type="number" step=".01" value="${o.diffC}"></label><label>Differenze €<input id="dce" type="number" step=".01" value="${o.diffCE}"></label></div><button class="btn primary">Salva obiettivi</button></form>`}
 function saveObj(e){e.preventDefault();let ids=['og','oc','ot','pg','rg','rge','dg','dge','pc','rc','rce','dc','dce'],ks=['gastronomia','carni','total','prodG','rottG','rottGE','diffG','diffGE','prodC','rottC','rottCE','diffC','diffCE'];ids.forEach((id,i)=>S.objectives[ks[i]]=Number($('#'+id).value)||0);save();view='home';render()}
 render();
