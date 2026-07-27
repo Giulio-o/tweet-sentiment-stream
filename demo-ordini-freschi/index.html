@@ -1,1 +1,77 @@
-<!doctype html><html lang='it'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Ordini Freschi Demo</title><link rel='stylesheet' href='styles.css'></head><body><header><div><h1>Ordini Freschi</h1><p id='today'></p></div><button id='resetBtn' class='ghost'>Reset demo</button></header><nav id='departments'></nav><main><section class='toolbar'><div><label>Tipo giornata<select id='dayType'><option>Normale</option><option>Debole</option><option>Forte</option><option>Prefestivo</option><option>Festivo</option><option>Post-festivo</option></select></label></div><div class='summary'><span id='countItems'></span><span id='countPromo'></span><span id='countCheck'></span></div></section><section id='calendarBanner' class='banner'></section><section class='actions'><button id='exceptionsBtn'>Controlla eccezioni</button><button id='allBtn' class='secondary'>Tutti gli articoli</button><button id='copyBtn' class='primary'>Copia nel gestionale</button></section><section id='list'></section></main><dialog id='copyDialog'><form method='dialog'><button class='close'>×</button></form><div id='copyCard'></div><div class='copyActions'><button id='prevCopy'>Indietro</button><button id='skipCopy'>Salta</button><button id='nextCopy' class='primary'>Fatto →</button></div></dialog><script src='app.js'></script></body></html>
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ordini Freschi Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div><h1>Ordini Freschi</h1><p id="today"></p></div>
+  <button id="resetBtn" class="ghost">Reset demo</button>
+</header>
+<nav id="departments"></nav>
+<main>
+  <section class="toolbar">
+    <label>Tipo giornata
+      <select id="dayType">
+        <option>Normale</option><option>Debole</option><option>Forte</option>
+        <option>Prefestivo</option><option>Festivo</option><option>Post-festivo</option>
+      </select>
+    </label>
+    <div class="summary"><span id="countItems"></span><span id="countPromo"></span><span id="countCheck"></span></div>
+  </section>
+  <section id="calendarBanner" class="banner"></section>
+  <section class="actions">
+    <button id="exceptionsBtn">Controlla eccezioni</button>
+    <button id="allBtn" class="secondary">Tutti gli articoli</button>
+    <button id="addBtn" class="add">＋ Aggiungi articolo</button>
+    <button id="copyBtn" class="primary">Copia nel gestionale</button>
+  </section>
+  <section id="list"></section>
+</main>
+
+<dialog id="editDialog">
+  <form id="editForm">
+    <div class="dialogHeader"><h2 id="editTitle">Modifica articolo</h2><button type="button" class="close" id="closeEdit">×</button></div>
+    <input type="hidden" id="editId">
+    <div class="formGrid">
+      <label class="full">Nome articolo<input id="editName" required maxlength="80"></label>
+      <label>Reparto<select id="editDept"></select></label>
+      <label>Codice<input id="editCode" required maxlength="20"></label>
+      <label>Unità di vendita<select id="editUnit"><option value="pz">pezzi</option><option value="kg">kg</option><option value="vaschette">vaschette</option><option value="forme">forme</option></select></label>
+      <label>Cartonaggio / contenuto collo<input id="editCaseSize" type="number" min="0.1" step="0.1" required></label>
+      <label>Vendite attese giornata simile<input id="editExpected" type="number" min="0" step="0.1" required></label>
+      <label>Scorta presente<input id="editStockUnits" type="number" min="0" step="0.1" required></label>
+    </div>
+
+    <div class="offerEditor">
+      <div class="offerLabel">Promozione</div>
+      <div class="offerButtons">
+        <button type="button" id="offerBtn" class="offerChoice offerRed">OFFERTA</button>
+        <button type="button" id="memberOfferBtn" class="offerChoice offerBlue">OFFERTA SOCI</button>
+      </div>
+      <div class="dateGrid">
+        <label>Dal<input id="offerFrom" type="date"></label>
+        <label>Al<input id="offerTo" type="date"></label>
+      </div>
+      <p class="hint">Tocca nuovamente il tipo selezionato per togliere la promozione.</p>
+    </div>
+
+    <div class="dialogActions">
+      <button type="button" id="removeBtn" class="danger">Rimuovi articolo</button>
+      <button type="button" id="cancelEdit">Annulla</button>
+      <button type="submit" class="primary">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="copyDialog">
+  <form method="dialog"><button class="close">×</button></form>
+  <div id="copyCard"></div>
+  <div class="copyActions"><button id="prevCopy">Indietro</button><button id="skipCopy">Salta</button><button id="nextCopy" class="primary">Fatto →</button></div>
+</dialog>
+<script src="app.js"></script>
+</body>
+</html>
