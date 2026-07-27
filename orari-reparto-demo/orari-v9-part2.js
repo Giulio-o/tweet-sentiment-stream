@@ -34,9 +34,16 @@ function build(){
   return out
 }
 function edited(ds){
+  S.crEdits=S.crEdits||{};
+  ds.forEach(d=>{
+    const crEdit=S.crEdits[key(d.date)];
+    if(crEdit?.deleted)d.cr=null;
+    else if(crEdit&&d.cr)Object.assign(d.cr,crEdit);
+  });
   if(typeof applyAvailabilityBlocks==='function')ds=applyAvailabilityBlocks(ds);
   ds.forEach(d=>['g','c'].forEach(dep=>{
     d[dep]=d[dep].filter((s,i)=>{
+      s._editIndex=i;
       const edit=S.edits[key(d.date)+'-'+dep+'-'+i];
       if(edit?.deleted)return false;
       if(edit)Object.assign(s,edit);
