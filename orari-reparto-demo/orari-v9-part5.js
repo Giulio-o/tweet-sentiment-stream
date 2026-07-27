@@ -1,11 +1,17 @@
 const TELEGRAM_CFG='orari_telegram_config_v1';
 let telegramRequests=[];
+let telegramLinks=[];
 let telegramLoading=false;
 let telegramError='';
 S.availabilityBlocks=S.availabilityBlocks||[];
 
 function telegramConfig(){
   try{return JSON.parse(localStorage.getItem(TELEGRAM_CFG)||'{}')}catch{return{}}
+}
+function refreshTelegramView(){
+  nav();
+  if(view==='requests')requestsPage();
+  else if(view==='skills')skills();
 }
 function saveTelegramConfig(){
   const url=String($('#tgUrl')?.value||'').trim();
@@ -20,8 +26,9 @@ function clearTelegramConfig(){
   if(!confirm('Eliminare il collegamento Telegram salvato su questo dispositivo?'))return;
   localStorage.removeItem(TELEGRAM_CFG);
   telegramRequests=[];
+  telegramLinks=[];
   telegramError='';
-  requestsPage();
+  refreshTelegramView();
 }
 function requestJsonp(url){
   return new Promise((resolve,reject)=>{
@@ -37,26 +44,34 @@ function requestJsonp(url){
 }
 async function loadTelegramRequests(){
   const cfg=telegramConfig();
-  if(!cfg.url||!cfg.key){requestsPage();return}
-  telegramLoading=true;telegramError='';requestsPage();
+  if(!cfg.url||!cfg.key){refreshTelegramView();return}
+  telegramLoading=true;telegramError='';refreshTelegramView();
   try{
     const data=await requestJsonp(cfg.url+'?key='+encodeURIComponent(cfg.key));
     if(!data?.ok)throw new Error(data?.error||'Risposta non valida');
     telegramRequests=Array.isArray(data.requests)?data.requests:[];
+    telegramLinks=Array.isArray(data.links)?data.links:[];
   }catch(err){telegramError=err.message||String(err)}
-  telegramLoading=false;requestsPage();
+  telegramLoading=false;refreshTelegramView();
+}
+function postTelegramAction(values){
+  const cfg=telegramConfig();
+  if(!cfg.url||!cfg.key)return Promise.reject(new Error('Collegamento Apps Script mancante'));
+  const form=new URLSearchParams({key:cfg.key,...values});
+  return fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:form.toString()});
 }
 function isoFromItalianDate(value){
   const m=String(value||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   return m?`${m[3]}-${m[2]}-${m[1]}`:'';
 }
-function normalizeEmployeeName(requestName){
-  const n=String(requestName||'').trim().toLowerCase();
-  const exact=S.employees.find(e=>e.name.toLowerCase()===n);
-  if(exact)return exact.name;
-  const first=n.split(/\s+/)[0];
-  const byFirst=S.employees.find(e=>e.name.toLowerCase().split(/\s+/)[0]===first);
-  return byFirst?.name||requestName;
+function telegramLinkById(telegramId){
+  return telegramLinks.find(x=>String(x.telegramId)===String(telegramId));
+}
+function telegramLinkForEmployee(employeeName){
+  return telegramLinks.find(x=>x.employeeName===employeeName);
+}
+function linkedEmployeeForRequest(req){
+  return telegramLinkById(req.telegramId)?.employeeName||'';
 }
 function blockRange(period){
   if(period==='Mattina')return[0,13*60+30];
@@ -102,53 +117,73 @@ function applyAvailabilityBlocks(ds){
         s.skill=`${s.skill} · sostituzione ${s.blockedOriginal}`;
       }
     }));
-    if(day.cr&&blockedAt(day.cr.name,day.date,day.cr.start,day.cr.end)){
-      day.cr.note+=' · indisponibilità da gestire';
-    }
+    if(day.cr&&blockedAt(day.cr.name,day.date,day.cr.start,day.cr.end))day.cr.note+=' · indisponibilità da gestire';
   });
   return ds;
 }
-function localRequestStatus(id){
-  const r=telegramRequests.find(x=>String(x.id)===String(id));
-  return r?.status||'';
+async function associateTelegramRequest(id){
+  const req=telegramRequests.find(x=>String(x.id)===String(id));
+  const employeeName=String($(`#assoc-${id}`)?.value||'').trim();
+  if(!req||!req.telegramId){alert('Telegram ID non disponibile per questa richiesta');return}
+  if(!employeeName){alert('Seleziona l’addetto corretto');return}
+  const previousForId=telegramLinkById(req.telegramId);
+  const previousForEmployee=telegramLinkForEmployee(employeeName);
+  const conflicts=[previousForId?.employeeName,previousForEmployee?.employeeName].filter(Boolean);
+  if(conflicts.length&&!confirm(`Il nuovo collegamento sostituirà quello esistente.\n\nCollegare questo profilo Telegram a ${employeeName}?`))return;
+  try{
+    await postTelegramAction({action:'associate',telegramId:String(req.telegramId),employeeName,username:req.username||'',telegramName:req.telegramName||req.name||''});
+    telegramLinks=telegramLinks.filter(x=>String(x.telegramId)!==String(req.telegramId)&&x.employeeName!==employeeName);
+    telegramLinks.push({telegramId:String(req.telegramId),employeeName,username:req.username||'',telegramName:req.telegramName||req.name||''});
+    S.availabilityBlocks.forEach(x=>{if(String(x.telegramId||'')===String(req.telegramId))x.name=employeeName});
+    save();refreshTelegramView();setTimeout(loadTelegramRequests,900);
+  }catch(err){alert('Associazione non riuscita: '+err.message)}
+}
+async function unlinkTelegramId(telegramId,employeeName){
+  if(!confirm(`Disassociare il profilo Telegram da ${employeeName}?\n\nLe indisponibilità già approvate restano nell’orario. I prossimi messaggi risulteranno non associati.`))return;
+  try{
+    await postTelegramAction({action:'unlink',telegramId:String(telegramId)});
+    telegramLinks=telegramLinks.filter(x=>String(x.telegramId)!==String(telegramId));
+    refreshTelegramView();setTimeout(loadTelegramRequests,900);
+  }catch(err){alert('Disassociazione non riuscita: '+err.message)}
 }
 async function sendRequestDecision(id,status){
-  const cfg=telegramConfig();
   const req=telegramRequests.find(x=>String(x.id)===String(id));
-  if(!cfg.url||!cfg.key||!req)return;
-  const form=new URLSearchParams({action:'status',key:cfg.key,id:String(id),status});
+  if(!req)return;
+  const employeeName=linkedEmployeeForRequest(req);
+  if(status==='Approvata'&&!employeeName){alert('Prima associa il profilo Telegram a un addetto');return}
   try{
-    await fetch(cfg.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:form.toString()});
+    await postTelegramAction({action:'status',id:String(id),status});
     req.status=status;
-    if(status==='Approvata')applyApprovedRequest(req);
-    requestsPage();
-    setTimeout(loadTelegramRequests,900);
+    if(status==='Approvata')applyApprovedRequest(req,employeeName);
+    refreshTelegramView();setTimeout(loadTelegramRequests,900);
   }catch(err){alert('Invio non riuscito: '+err.message)}
 }
-function applyApprovedRequest(req){
-  const date=isoFromItalianDate(req.dateRequested);
-  const period=req.blockedPeriod;
-  const name=normalizeEmployeeName(req.name);
+function applyApprovedRequest(req,employeeName){
+  const date=isoFromItalianDate(req.dateRequested),period=req.blockedPeriod;
   if(!date||!period||period==='Da verificare'){
     alert('Richiesta approvata nel Foglio, ma data o fascia devono essere verificate manualmente.');
     return;
   }
   const exists=S.availabilityBlocks.some(x=>x.requestId===String(req.id));
-  if(!exists)S.availabilityBlocks.push({requestId:String(req.id),name,date,period,source:'Telegram'});
-  save();
-  week=mon(new Date(date+'T12:00:00'));
-  alert(`${name}: ${period.toLowerCase()} bloccata il ${req.dateRequested}. L’orario è stato ricalcolato.`);
+  if(!exists)S.availabilityBlocks.push({requestId:String(req.id),telegramId:String(req.telegramId||''),name:employeeName,date,period,source:'Telegram'});
+  else S.availabilityBlocks.forEach(x=>{if(x.requestId===String(req.id)){x.telegramId=String(req.telegramId||'');x.name=employeeName;x.date=date;x.period=period}});
+  save();week=mon(new Date(date+'T12:00:00'));
+  alert(`${employeeName}: ${period.toLowerCase()} bloccata il ${req.dateRequested}. L’orario è stato ricalcolato.`);
 }
-function removeAvailabilityBlock(i){
-  S.availabilityBlocks.splice(i,1);save();requestsPage();
+function removeAvailabilityBlock(i){S.availabilityBlocks.splice(i,1);save();requestsPage()}
+function employeeOptions(selected=''){
+  return ['<option value="">Seleziona addetto…</option>',...S.employees.map(e=>`<option value="${esc(e.name)}" ${e.name===selected?'selected':''}>${esc(e.name)}</option>`)].join('');
+}
+function requestAssociationHtml(r){
+  const link=telegramLinkById(r.telegramId);
+  if(link)return`<div class="telegram-linked"><div><b>Associato a ${esc(link.employeeName)}</b><br><small>${esc(link.telegramName||r.telegramName||r.name||'Profilo Telegram')} ${link.username?`· ${esc(link.username)}`:''}</small></div><button class="btn danger small" onclick="unlinkTelegramId('${esc(r.telegramId)}','${esc(link.employeeName)}')">Disassocia</button></div>`;
+  return`<div class="associate-box"><b>Addetto non associato</b><small>Seleziona una volta il nome corretto. I messaggi successivi saranno riconosciuti tramite Telegram ID.</small><div class="associate-row"><select id="assoc-${esc(r.id)}">${employeeOptions()}</select><button class="btn primary" onclick="associateTelegramRequest('${esc(r.id)}')">Associa</button></div></div>`;
 }
 function requestsPage(){
-  const cfg=telegramConfig();
-  const connected=Boolean(cfg.url&&cfg.key);
-  const pending=telegramRequests.filter(r=>r.status==='Da approvare');
+  const cfg=telegramConfig(),connected=Boolean(cfg.url&&cfg.key);
   $('#app').innerHTML=`
     <div class="card connection">
-      <div class="row wrap"><div><h2>Richieste Telegram</h2><small class="muted">Il collegamento resta salvato solo in questo browser.</small></div>${connected?'<span class="request-status">Collegato</span>':'<span class="request-status pending">Da collegare</span>'}</div>
+      <div class="row wrap"><div><h2>Richieste Telegram</h2><small class="muted">URL e chiave restano salvati solo in questo browser.</small></div>${connected?'<span class="request-status">Collegato</span>':'<span class="request-status pending">Da collegare</span>'}</div>
       <div class="form">
         <label>URL Apps Script<input id="tgUrl" placeholder="https://script.google.com/macros/s/.../exec" value="${esc(cfg.url||'')}"></label>
         <label>Chiave amministratore<input id="tgKey" type="password" placeholder="Chiave salvata nelle Proprietà script" value="${esc(cfg.key||'')}"></label>
@@ -156,6 +191,6 @@ function requestsPage(){
       </div>
     </div>
     ${connected?`<div class="card"><div class="row"><h3>Richieste ricevute</h3><button class="btn small" onclick="loadTelegramRequests()">Aggiorna</button></div>${telegramLoading?'<p><span class="spinner"></span>Caricamento…</p>':''}${telegramError?`<p class="bad"><b>${esc(telegramError)}</b></p>`:''}${!telegramLoading&&!telegramError&&!telegramRequests.length?'<p class="muted">Nessuna richiesta disponibile.</p>':''}</div>`:''}
-    ${telegramRequests.map(r=>`<div class="card request-card"><div class="row wrap"><div><b>${esc(r.name)}</b><br><small>${esc(r.username||'')}</small></div><span class="request-status ${r.status==='Da approvare'?'pending':''}">${esc(r.status)}</span></div><div class="request-message">“${esc(r.message)}”</div><div class="grid"><div><small>Data</small><br><b>${esc(r.dateRequested)}</b></div><div><small>Fascia bloccata</small><br><b>${esc(r.blockedPeriod)}</b></div></div>${r.status==='Da approvare'?`<div class="request-actions"><button class="btn primary" onclick="sendRequestDecision('${esc(r.id)}','Approvata')">Approva e ricalcola</button><button class="btn danger" onclick="sendRequestDecision('${esc(r.id)}','Rifiutata')">Rifiuta</button></div>`:''}</div>`).join('')}
+    ${telegramRequests.map(r=>{const employeeName=linkedEmployeeForRequest(r);return`<div class="card request-card"><div class="row wrap"><div><b>${esc(r.telegramName||r.name||'Profilo Telegram')}</b><br><small>${esc(r.username||'Senza username')}</small></div><span class="request-status ${r.status==='Da approvare'?'pending':''}">${esc(r.status)}</span></div><div class="request-message">“${esc(r.message)}”</div>${requestAssociationHtml(r)}<div class="grid"><div><small>Data</small><br><b>${esc(r.dateRequested)}</b></div><div><small>Fascia bloccata</small><br><b>${esc(r.blockedPeriod)}</b></div></div>${r.status==='Da approvare'?`<div class="request-actions">${employeeName?`<button class="btn primary" onclick="sendRequestDecision('${esc(r.id)}','Approvata')">Approva per ${esc(employeeName)}</button>`:'<button class="btn" disabled>Associa prima l’addetto</button>'}<button class="btn danger" onclick="sendRequestDecision('${esc(r.id)}','Rifiutata')">Rifiuta</button></div>`:''}</div>`}).join('')}
     <div class="card"><h3>Indisponibilità approvate nell’app</h3>${S.availabilityBlocks.length?S.availabilityBlocks.map((x,i)=>`<div class="req"><span><b>${esc(x.name)}</b><br><small>${esc(x.date)} · ${esc(x.period)}</small></span><button class="btn danger small" onclick="removeAvailabilityBlock(${i})">Elimina</button></div>`).join(''):'<p class="muted">Nessuna indisponibilità applicata.</p>'}</div>`;
 }
