@@ -34,6 +34,7 @@ function build(){
   return out
 }
 function edited(ds){
+  if(typeof applyAvailabilityBlocks==='function')ds=applyAvailabilityBlocks(ds);
   ds.forEach(d=>['g','c'].forEach(dep=>{
     d[dep]=d[dep].filter((s,i)=>{
       const edit=S.edits[key(d.date)+'-'+dep+'-'+i];
