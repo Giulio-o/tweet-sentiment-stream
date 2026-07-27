@@ -1,0 +1,69 @@
+:root{--b:#173f5f;--b2:#2d6d8d;--bg:#f3f6f8;--bd:#d9e2e7;--bad:#b3261e;--ok:#14734b;--p:#6f42c1;--holiday:#9a5b00}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#17212b;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--b),var(--b2));color:#fff;padding:11px 14px;box-shadow:0 4px 14px #0003}
+.head{max-width:760px;margin:auto}
+h1{font-size:1.15rem;margin:0}
+h2,h3{margin:0 0 8px}
+.weekbar{display:none;grid-template-columns:45px 1fr 45px;gap:8px;align-items:center;margin-top:9px}
+.weekbar.on{display:grid}
+.weekbar button{height:40px;border:1px solid #fff5;border-radius:12px;background:#fff2;color:#fff;font-size:1.4rem}
+.weekbar div{text-align:center;font-weight:800}
+main{max-width:760px;margin:auto;padding:13px 13px 88px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:13px;margin-bottom:11px;box-shadow:0 5px 18px #173f5f12}
+.hero{background:linear-gradient(135deg,var(--b),var(--b2));color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wide{grid-column:1/-1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wrap{flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:10px;font-weight:800;background:#eaf0f4;color:var(--b)}
+.btn.small{padding:7px 9px;font-size:.78rem}
+.btn.primary{background:var(--b);color:#fff}
+.btn.danger{background:#fdecea;color:var(--bad)}
+.btn.holiday{background:#fff2d9;color:#7b4900}
+nav{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:#fffffff5;border-top:1px solid var(--bd);padding:6px}
+nav button{border:0;background:transparent;padding:7px 2px;color:#667784;font-size:.68rem}
+nav button b{display:block;font-size:1.05rem}
+nav button.on{color:var(--b);font-weight:900;background:#edf3f6;border-radius:10px}
+.dept{border-left:5px solid var(--b)}
+.carni{border-left-color:#8a5a2b}
+.cr{border-left:5px solid var(--p);background:#faf7ff}
+.shift{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-top:1px solid var(--bd)}
+.shift:first-child{border-top:0}
+.time{font-weight:900}
+.pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#edf3f6;color:var(--b);font-size:.7rem;margin-top:3px}
+.bad{color:var(--bad)}
+.ok{color:var(--ok)}
+.muted{color:#667784}
+.req{display:grid;grid-template-columns:1fr auto;gap:7px;padding:7px 0;border-top:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th,td{padding:7px 4px;border-bottom:1px solid var(--bd);text-align:right}
+th:first-child,td:first-child{text-align:left}
+.scroll{overflow-x:auto}
+.crrow{background:#faf7ff}
+.redbox{background:#fff6f5}
+.greenbox{background:#f0faf5}
+.purplebox{background:#f7f2ff}
+.holiday-open{background:#fff8e8;border-color:#e0b461}
+.holiday-closed{background:#f1f3f5;border-color:#aab4bd}
+.holiday-badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:.72rem;font-weight:900;background:#fff2d9;color:#7b4900}
+.holiday-badge.closed{background:#e8ecef;color:#46535d}
+.credit-grid{display:grid;grid-template-columns:1fr 90px;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--bd)}
+.extra-box{background:#eef7ff;border-color:#9bc4df}
+.extra-row{display:grid;grid-template-columns:auto 1fr 105px 105px;gap:8px;align-items:end;padding:10px 0;border-top:1px solid var(--bd)}
+.extra-row:first-of-type{border-top:0}
+.extra-row input[type="checkbox"]{width:22px;height:22px;margin:0 0 9px}
+.target-note{font-size:.72rem;color:#667784;margin-top:4px}
+@media(max-width:560px){.extra-row{grid-template-columns:30px 1fr 1fr}.extra-row .employee-select{grid-column:2/-1}}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:11px;background:#fff}
+label{display:grid;gap:4px;font-size:.8rem;font-weight:750;color:#667784}
+.form{display:grid;gap:9px}
+.emp{padding:9px 0;border-top:1px solid var(--bd)}
+.hidden{display:none!important}
+@media(max-width:460px){
+  .shift{grid-template-columns:1fr auto}
+  .shift .edit{grid-column:2}
+  .grid{grid-template-columns:1fr 1fr}
+  table{font-size:.74rem}
+  th,td{padding:6px 3px}
+}
