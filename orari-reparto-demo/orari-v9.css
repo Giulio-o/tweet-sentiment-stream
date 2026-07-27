@@ -70,8 +70,9 @@ th:first-child,td:first-child{text-align:left}
 .employee-week-head{background:#eef7ff;border-color:#9bc4df}
 .employee-summary{margin-bottom:11px}
 .employee-day{border-left:5px solid var(--b)}
-.employee-shift{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--bd)}
+.employee-shift{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--bd)}
 .employee-shift:first-of-type{border-top:0}
+.employee-edit{align-self:center}
 .day-state{border-radius:12px;padding:12px;margin-top:8px;text-align:center}
 .rest-state{background:#f1f3f5;color:#52616d}
 .leave-state{background:#eaf4ff;color:#175c87}
@@ -93,4 +94,6 @@ label{display:grid;gap:4px;font-size:.8rem;font-weight:750;color:#667784}
   .request-actions{grid-template-columns:1fr}
   .associate-row{grid-template-columns:1fr}
   .telegram-linked,.telegram-employee{align-items:flex-start;flex-direction:column}
+  .employee-shift{grid-template-columns:1fr auto}
+  .employee-shift .employee-edit{grid-column:2}
 }
