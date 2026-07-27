@@ -21,9 +21,9 @@ main{max-width:760px;margin:auto;padding:13px 13px 88px}
 .btn.primary{background:var(--b);color:#fff}
 .btn.danger{background:#fdecea;color:var(--bad)}
 .btn.holiday{background:#fff2d9;color:#7b4900}
-nav{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:#fffffff5;border-top:1px solid var(--bd);padding:6px}
-nav button{border:0;background:transparent;padding:7px 2px;color:#667784;font-size:.68rem}
-nav button b{display:block;font-size:1.05rem}
+nav{position:fixed;z-index:30;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(6,1fr);background:#fffffff5;border-top:1px solid var(--bd);padding:6px}
+nav button{border:0;background:transparent;padding:7px 1px;color:#667784;font-size:.62rem}
+nav button b{display:block;font-size:1.03rem}
 nav button.on{color:var(--b);font-weight:900;background:#edf3f6;border-radius:10px}
 .dept{border-left:5px solid var(--b)}
 .carni{border-left-color:#8a5a2b}
@@ -54,6 +54,15 @@ th:first-child,td:first-child{text-align:left}
 .extra-row:first-of-type{border-top:0}
 .extra-row input[type="checkbox"]{width:22px;height:22px;margin:0 0 9px}
 .target-note{font-size:.72rem;color:#667784;margin-top:4px}
+.request-card{border-left:5px solid #2581b8}
+.request-message{background:#f4f8fb;border-radius:12px;padding:10px;margin:9px 0;font-style:italic}
+.request-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.request-status{display:inline-block;padding:4px 8px;border-radius:999px;background:#eaf0f4;color:var(--b);font-size:.72rem;font-weight:900}
+.request-status.pending{background:#fff2d9;color:#7b4900}
+.connection{background:#eef7ff;border-color:#9bc4df}
+.block-card{border-left:5px solid #b3261e;background:#fff8f7}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #9db2c0;border-top-color:var(--b);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:560px){.extra-row{grid-template-columns:30px 1fr 1fr}.extra-row .employee-select{grid-column:2/-1}}
 input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:11px;background:#fff}
 label{display:grid;gap:4px;font-size:.8rem;font-weight:750;color:#667784}
@@ -66,4 +75,5 @@ label{display:grid;gap:4px;font-size:.8rem;font-weight:750;color:#667784}
   .grid{grid-template-columns:1fr 1fr}
   table{font-size:.74rem}
   th,td{padding:6px 3px}
+  .request-actions{grid-template-columns:1fr}
 }
