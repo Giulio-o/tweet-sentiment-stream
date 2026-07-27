@@ -10,7 +10,7 @@ const base=[
   {name:'Andrea',hours:24,dept:'gastronomia',skills:{Forno:1,Ordini:0,Servizio:3,Macelleria:0,Pescheria:0}},
   {name:'Paola',hours:20,dept:'gastronomia',skills:{Forno:1,Ordini:0,Servizio:3,Macelleria:0,Pescheria:0}},
   {name:'Chiara',hours:20,dept:'gastronomia',skills:{Forno:1,Ordini:0,Servizio:3,Macelleria:0,Pescheria:0}},
-  {name:'Michele',hours:36,dept:'carni',skills:{Forno:0,Ordini:0,Servizio:2,Macelleria:3,Pescheria:2}}
+  {name:'Lorenzo',hours:36,dept:'carni',skills:{Forno:0,Ordini:0,Servizio:3,Macelleria:3,Pescheria:0}}
 ];
 
 const DEF={employees:base,leaves:[],holidays:[],edits:{},objectives:{gastronomia:215,carni:50,total:265}};
@@ -26,6 +26,28 @@ if(stateWithCustomNames&&(!S.employees||hasDefaultNames(S)))S={...S,employees:st
 S={...DEF,...S,objectives:{...DEF.objectives,...(S.objectives||{})}};
 S.leaves=S.leaves||[];S.holidays=S.holidays||[];S.edits=S.edits||{};
 S.employees=(S.employees||base).map(e=>({...e,skills:{Forno:0,Ordini:0,Servizio:0,Macelleria:0,Pescheria:0,...(e.skills||{})},dept:e.cr?'misto':(e.dept||'gastronomia')}));
+const butcher=S.employees.find(e=>!e.cr&&e.dept==='carni'&&Number(e.hours)===36)||S.employees.find(e=>!e.cr&&Number(e.hours)===36&&(e.skills?.Macelleria||0)>=2);
+if(butcher){
+  const oldName=butcher.name;
+  butcher.name='Lorenzo';
+  butcher.hours=36;
+  butcher.dept='carni';
+  butcher.skills={Forno:0,Ordini:0,Servizio:3,Macelleria:3,Pescheria:0};
+  if(oldName&&oldName!=='Lorenzo'){
+    S.leaves.forEach(x=>{if(x.name===oldName)x.name='Lorenzo'});
+    Object.values(S.edits).forEach(x=>{if(x?.name===oldName)x.name='Lorenzo'});
+    S.holidays.forEach(h=>{
+      if(h.credits&&Object.prototype.hasOwnProperty.call(h.credits,oldName)){
+        h.credits.Lorenzo=h.credits[oldName];
+        delete h.credits[oldName];
+      }
+      if(h.extras?.g?.employee===oldName)h.extras.g.employee='Lorenzo';
+      if(h.extras?.c?.employee===oldName)h.extras.c.employee='Lorenzo';
+    });
+  }
+}else{
+  S.employees.push({...base[base.length-1]});
+}
 if(!S.employees.some(e=>!e.cr&&e.dept==='gastronomia'&&e.skills.Macelleria>=2)){const x=S.employees.find(e=>!e.cr&&e.dept==='gastronomia'&&e.hours===36);if(x)x.skills.Macelleria=2}
 let view='home',week=mon(new Date()),holidayDraftDate='';
 const $=q=>document.querySelector(q),add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},key=d=>d.toISOString().slice(0,10),fmt=d=>d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
@@ -37,7 +59,7 @@ function dur(s){if(s.coveredByCR)return 0;return hrs(s.start,s.end,s.pause||0)+(
 function hf(v){const m=Math.max(0,Math.round((Number(v)||0)*60));return`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`}
 function parseHM(value){const v=String(value??'').trim().replace(',','.');if(!v)return 0;if(v.includes(':')){const[h,m]=v.split(':').map(Number);return Math.max(0,(h||0)+(m||0)/60)}return Math.max(0,Number(v)||0)}
 function dailyCredit(e){const h=Number(e.hours)||0;if(h===38)return 6+20/60;if(h===36)return 6;if(h===30)return 5;if(h===24)return 4;if(h===20)return 4;return Math.round(h/6*12)/12}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
 function leave(name,d){const k=key(d);return S.leaves.some(x=>x.name===name&&k>=x.from&&k<=x.to)}
 function staff(dep){return S.employees.filter(e=>!e.cr&&(!dep||e.dept===dep))}
 function holidayFor(d){const k=typeof d==='string'?d:key(d);return S.holidays.find(h=>h.date===k)||null}
