@@ -7,5 +7,21 @@ function shiftRow(s,d,dep,i){return`<div class="shift"><div><b>${esc(s.name)}</b
 function holidayBanner(day){const h=day.holiday;if(!h)return'';if(h.type==='closed'){const total=S.employees.reduce((a,e)=>a+creditFor(h,e.name),0);return`<div class="card holiday-closed"><div class="row wrap"><div><span class="holiday-badge closed">CHIUSO</span> <b>${esc(h.label||'Festività')}</b></div><button class="btn small holiday" onclick="openHoliday('${h.date}')">Modifica</button></div><p class="muted">Nessun turno. Ore contrattuali riconosciute complessive: <b>${hf(total)}</b>.</p></div>`}const uncovered=[...day.g,...day.c].some(s=>s.name==='SCOPERTO');return`<div class="card holiday-open"><div class="row wrap"><div><span class="holiday-badge">APERTO</span> <b>${esc(h.label||'Festività')}</b></div><button class="btn small holiday" onclick="openHoliday('${h.date}')">Modifica</button></div><p class="${uncovered?'bad':'ok'}"><b>${uncovered?'Attenzione: esiste una posizione scoperta.':'Servizio garantito con i turni programmati.'}</b></p></div>`}
 function schedule(){const ds=edited(build()),t=totals(ds),target=effectiveTargets(),r=target.reductions;$('#app').innerHTML=`<div class="card purplebox"><div class="row wrap"><div><b>CR: rotazione settimana ${off()+1}/6</b><br><small>Sabato: macellaio e secondo competente si alternano tra mattina e 15:00–18:00.</small></div><button class="btn holiday" onclick="openHoliday('${key(week)}')">＋ Festività</button></div></div><div class="grid"><div class="card"><small>Gastronomia</small><br><b>${hf(t.g)} / ${hf(target.g)}</b>${r.g?`<div class="target-note">Obiettivo ridotto di ${hf(r.g)} per chiusura festiva.</div>`:''}</div><div class="card"><small>Carni</small><br><b>${hf(t.c)} / ${hf(target.c)}</b>${r.c?`<div class="target-note">Obiettivo ridotto di ${hf(r.c)}${r.fish?`, inclusi ${hf(r.fish)} di vendita pesce non effettuata`:''}.</div>`:''}</div><div class="card"><small>Totale obiettivo effettivo</small><br><b>${hf(t.total)} / ${hf(target.total)}</b>${r.total?`<div class="target-note">Riduzione complessiva: ${hf(r.total)}.</div>`:''}</div><div class="card"><small>Ore festive riconosciute</small><br><b>${hf(t.holiday)}</b><div class="target-note">Coprono il contratto personale, non sono ore lavorate.</div></div></div>${hoursHtml(ds)}${ds.map((d,i)=>`<section class="card"><div class="row wrap"><h3>${DAYS[i]} ${fmt(d.date)}</h3><div><b>${hf(d.g.reduce((a,s)=>a+dur(s),0)+d.c.reduce((a,s)=>a+dur(s),0))}</b> <button class="btn small holiday" onclick="openHoliday('${key(d.date)}')">Festività</button></div></div>${holidayBanner(d)}${d.holiday?.type==='closed'?'':`${d.cr?`<div class="card cr"><b>${esc(d.cr.name)} · CR</b><div class="time">${d.cr.start}–${d.cr.end}${d.cr.start2?` / ${d.cr.start2}–${d.cr.end2}`:''}</div><span class="pill">${esc(d.cr.note)}</span></div>`:''}<div class="card dept"><h3>Gastronomia</h3>${d.g.map((s,j)=>shiftRow(s,d.date,'g',j)).join('')}</div><div class="card dept carni"><h3>Carni e pescheria</h3>${d.c.length?d.c.map((s,j)=>shiftRow(s,d.date,'c',j)).join(''):'<p class="muted">Il terzo addetto delle 7:00 ripristina e poi serve al banco Carni.</p>'}</div>`}</section>`).join('')}`}
 function move(n){week=add(week,n);header();schedule()}
-function editShift(date,dep,i,name,start,end){const n=prompt('Addetto',name);if(n===null)return;const a=prompt('Entrata',start);if(a===null)return;const b=prompt('Uscita',end);if(b===null)return;S.edits[`${date}-${dep}-${i}`]={name:n,start:a,end:b};save();schedule()}
+function editShift(date,dep,i,name,start,end){
+  if(confirm(`Eliminare il turno di ${name} ${start}–${end}?\n\nOK = elimina turno\nAnnulla = modifica turno`)){
+    S.edits[`${date}-${dep}-${i}`]={deleted:true};
+    save();
+    schedule();
+    return;
+  }
+  const n=prompt('Addetto',name);
+  if(n===null)return;
+  const a=prompt('Entrata',start);
+  if(a===null)return;
+  const b=prompt('Uscita',end);
+  if(b===null)return;
+  S.edits[`${date}-${dep}-${i}`]={name:n,start:a,end:b};
+  save();
+  schedule();
+}
 function quickLeave(name){const f=prompt('Ferie dal',key(week));if(!f)return;const t=prompt('Ferie al',key(add(week,6)));if(!t)return;S.leaves.push({name,from:f,to:t});save();schedule()}
