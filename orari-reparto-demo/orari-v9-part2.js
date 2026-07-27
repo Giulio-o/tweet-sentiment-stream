@@ -33,7 +33,17 @@ function build(){
   }
   return out
 }
-function edited(ds){ds.forEach(d=>['g','c'].forEach(dep=>d[dep].forEach((s,i)=>Object.assign(s,S.edits[key(d.date)+'-'+dep+'-'+i]||{}))));return ds}
+function edited(ds){
+  ds.forEach(d=>['g','c'].forEach(dep=>{
+    d[dep]=d[dep].filter((s,i)=>{
+      const edit=S.edits[key(d.date)+'-'+dep+'-'+i];
+      if(edit?.deleted)return false;
+      if(edit)Object.assign(s,edit);
+      return true;
+    });
+  }));
+  return ds;
+}
 function totals(ds){let g=0,c=0,holiday=0;ds.forEach(d=>{d.g.forEach(s=>g+=dur(s));d.c.forEach(s=>c+=dur(s));if(d.holiday?.type==='closed')S.employees.forEach(e=>holiday+=creditFor(d.holiday,e.name))});return{g,c,total:g+c,holiday}}
 function people(ds){const worked={},festive={};S.employees.forEach(e=>{worked[e.name]=0;festive[e.name]=0});ds.forEach(d=>{d.g.forEach(s=>worked[s.name]=(worked[s.name]||0)+dur(s));d.c.forEach(s=>worked[s.name]=(worked[s.name]||0)+dur(s));if(d.cr)worked[d.cr.name]=(worked[d.cr.name]||0)+dur(d.cr);if(d.holiday?.type==='closed')S.employees.forEach(e=>festive[e.name]+=creditFor(d.holiday,e.name))});return S.employees.map(e=>{const w=worked[e.name]||0,f=festive[e.name]||0,accounted=w+f;return{...e,worked:w,festive:f,accounted,extra:Math.max(0,accounted-e.hours),missing:Math.max(0,e.hours-accounted)}})}
 function requirements(){const g=staff('gastronomia'),c=staff('carni'),r={cr:S.employees.filter(e=>e.cr&&e.hours===38).length,g36:g.filter(e=>e.hours===36).length,g30:g.filter(e=>e.hours===30).length,g24:g.filter(e=>e.hours===24).length,g20:g.filter(e=>e.hours===20).length,mac:c.filter(e=>e.hours===36&&e.skills.Macelleria>=2).length,backup:g.filter(e=>e.skills.Macelleria>=2).length,forno:g.filter(e=>e.skills.Forno>=2).length,ord:g.filter(e=>e.skills.Ordini>=2).length,fish:g.filter(e=>e.skills.Pescheria>=1).length};r.ok=r.cr===1&&r.g36===2&&r.g30===1&&r.g24===2&&r.g20===2&&r.mac===1&&r.backup>=1&&r.forno>=3&&r.ord>=2&&r.fish>=1;return r}
