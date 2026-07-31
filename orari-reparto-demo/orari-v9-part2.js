@@ -1,5 +1,5 @@
 function build(){
-  const load=closedCreditsInWeek();
+  const load=closedCreditsInWeek(),mix=initShiftMix();
   const out=[];
   for(let i=0;i<7;i++){
     const d=add(week,i),holiday=holidayFor(d),day={date:d,g:[],c:[],cr:null,holiday},used=[],reserved=[];
@@ -9,24 +9,24 @@ function build(){
     const backup=i===5?staff('gastronomia').filter(e=>!leave(e.name,d)&&e.skills.Macelleria>=2).sort((a,b)=>(load[a.name]||0)-(load[b.name]||0))[0]:null;
     if(backup)reserved.push(backup.name);
     if(i<6){
-      const t=[['06:15','13:00','Forno'],['06:30','13:30','Ordini']],cm=day.cr&&(day.cr.mode==='morning'||day.cr.mode==='split');
-      if(!cm)t.push(['09:30','13:30','Servizio']);
-      if(day.cr?.mode==='evening')t.push(['16:30','20:45','Chiusura'],['16:30','20:45','Chiusura']);else t.push(['13:30','20:45','Chiusura'],['16:30','20:45','Chiusura']);
-      if(i===5)t.push(['09:30','13:30','Rinforzo sabato'],['13:00','17:30','Rinforzo sabato']);
-      t.forEach(x=>{const sk=['Servizio','Chiusura','Rinforzo sabato'].some(z=>x[2].includes(z))?'Servizio':x[2],n=choose(sk,d,load,used.concat(reserved));used.push(n);push(day,'g',{name:n,start:x[0],end:x[1],skill:x[2],pause:x[0]==='13:30'?15:0},load)})
+      const t=[['06:15','13:00','Forno','morning'],['06:30','13:30','Ordini','morning']],cm=day.cr&&(day.cr.mode==='morning'||day.cr.mode==='split');
+      if(!cm)t.push(['09:30','13:30','Servizio','morning']);
+      if(day.cr?.mode==='evening')t.push(['16:30','20:45','Chiusura','evening'],['16:30','20:45','Chiusura','evening']);else t.push(['13:30','20:45','Chiusura','evening'],['16:30','20:45','Chiusura','evening']);
+      if(i===5)t.push(['09:30','13:30','Rinforzo sabato','morning'],['13:00','17:30','Rinforzo sabato','evening']);
+      t.forEach(x=>{const sk=['Servizio','Chiusura','Rinforzo sabato'].some(z=>x[2].includes(z))?'Servizio':x[2],n=chooseGastr(sk,x[3],d,load,mix,used.concat(reserved));used.push(n);push(day,'g',{name:n,start:x[0],end:x[1],skill:x[2],pause:x[0]==='13:30'?15:0},load,mix,x[3])})
     }else{
-      for(let j=0;j<2;j++){const n=choose('Servizio',d,load,used);used.push(n);push(day,'g',{name:n,start:'07:00',end:'13:30',skill:'Servizio gastronomia',pause:15},load)}
+      for(let j=0;j<2;j++){const n=chooseGastr('Servizio','morning',d,load,mix,used);used.push(n);push(day,'g',{name:n,start:'07:00',end:'13:30',skill:'Servizio gastronomia',pause:15},load,mix,'morning')}
       const candidates=(d.getDate()<=7?staff('carni'):staff('gastronomia')).filter(e=>!used.includes(e.name)&&!leave(e.name,d)&&e.skills.Servizio>0).sort((a,b)=>(load[a.name]||0)-(load[b.name]||0));
-      const n=candidates[0]?.name||choose('Servizio',d,load,used);push(day,'g',{name:n,start:'07:00',end:'13:30',skill:'Ripristino carne/pesce → banco Carni',pause:15},load)
+      const n=candidates[0]?.name||chooseGastr('Servizio','morning',d,load,mix,used);push(day,'g',{name:n,start:'07:00',end:'13:30',skill:'Ripristino carne/pesce → banco Carni',pause:15},load,mix,'morning')
     }
     if(i<5){
       const arr=[[[ '06:30','13:30','Macelleria' ]],[[ '07:00','13:15','Macelleria' ]],[[ '06:30','13:30','Macelleria' ]],[[ '07:00','13:15','Macelleria' ]],[[ '06:30','13:30','Macelleria' ],[ '06:30','13:30','Vendita pesce · Gastronomia' ]]][i],cu=[];
-      arr.forEach(x=>{const fish=x[2].includes('pesce'),n=choose(fish?'Pescheria':'Macelleria',d,load,fish?used:cu,fish?'gastronomia':'carni');cu.push(n);push(day,'c',{name:n,start:x[0],end:x[1],skill:x[2],pause:hrs(x[0],x[1])>6?15:0},load)})
+      arr.forEach(x=>{const fish=x[2].includes('pesce'),n=fish?chooseGastr('Pescheria','morning',d,load,mix,used):choose('Macelleria',d,load,cu,'carni');cu.push(n);push(day,'c',{name:n,start:x[0],end:x[1],skill:x[2],pause:hrs(x[0],x[1])>6?15:0},load,fish?mix:null,fish?'morning':null)})
     }else if(i===5){
       const main=staff('carni').filter(e=>!leave(e.name,d)&&e.skills.Macelleria>=2)[0];let morning,afternoon,crCover=false;
       if(swapSat()){afternoon=main?.name||'SCOPERTO';if(backup)morning=backup.name;else if(crCanMorning(day.cr)){morning=day.cr.name;crCover=true}else morning='SCOPERTO'}else{morning=main?.name||'SCOPERTO';afternoon=backup?.name||'SCOPERTO'}
-      push(day,'c',{name:morning,start:'06:30',end:'13:30',skill:crCover?'Macelleria mattina · nel turno CR':'Macelleria mattina',pause:15,coveredByCR:crCover},load);
-      push(day,'c',{name:afternoon,start:'15:00',end:'18:00',skill:'Macelleria pomeriggio · rotazione'},load)
+      push(day,'c',{name:morning,start:'06:30',end:'13:30',skill:crCover?'Macelleria mattina · nel turno CR':'Macelleria mattina',pause:15,coveredByCR:crCover},load,morning===backup?.name?mix:null,morning===backup?.name?'morning':null);
+      push(day,'c',{name:afternoon,start:'15:00',end:'18:00',skill:'Macelleria pomeriggio · rotazione'},load,afternoon===backup?.name?mix:null,afternoon===backup?.name?'evening':null)
     }
     appendPreHolidayExtras(day,d,load,holidayFor(add(d,1)));
     out.push(day)
