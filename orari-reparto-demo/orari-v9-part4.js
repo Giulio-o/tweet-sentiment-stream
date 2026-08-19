@@ -29,6 +29,36 @@ function editSkills(i){SKILLS.forEach(k=>{const v=prompt(`${k} 0-3`,S.employees[
 function leavePage(){$('#app').innerHTML=`<div class="card"><h2>Ferie</h2><form class="form" onsubmit="addLeave(event)"><label>Addetto<select id="ln">${S.employees.map(e=>`<option>${esc(e.name)}</option>`).join('')}</select></label><label>Dal<input id="lf" type="date" required></label><label>Al<input id="lt" type="date" required></label><button class="btn primary">Inserisci</button></form></div>${S.leaves.map((x,i)=>`<div class="card row"><span><b>${esc(x.name)}</b><br><small>${x.from} → ${x.to}</small></span><button class="btn danger small" onclick="delLeave(${i})">Elimina</button></div>`).join('')}`}
 function addLeave(e){e.preventDefault();S.leaves.push({name:$('#ln').value,from:$('#lf').value,to:$('#lt').value});save();view='schedule';render()}
 function delLeave(i){S.leaves.splice(i,1);save();leavePage()}
-function obj(){$('#app').innerHTML=`<form class="card form" onsubmit="saveObj(event)"><h2>Obiettivi ore</h2><label>Gastronomia<input id="og" type="number" step=".25" value="${S.objectives.gastronomia}"></label><label>Carni<input id="oc" type="number" step=".25" value="${S.objectives.carni}"></label><label>Totale<input id="ot" type="number" step=".25" value="${S.objectives.total}"></label><button class="btn primary">Salva</button></form>`}
-function saveObj(e){e.preventDefault();S.objectives={gastronomia:Number($('#og').value)||0,carni:Number($('#oc').value)||0,total:Number($('#ot').value)||0};save();go('home')}
+const OBJ_MONTHS=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function ensureObjectiveStructure(){
+  S.objectives=S.objectives||{gastronomia:0,carni:0,total:0};
+  S.objectives.annual={gastronomia:0,carni:0,total:0,...(S.objectives.annual||{})};
+  S.objectives.monthly=S.objectives.monthly||{};
+  for(let i=1;i<=12;i++){
+    const k=String(i).padStart(2,'0');
+    S.objectives.monthly[k]={gastronomia:0,carni:0,total:0,...(S.objectives.monthly[k]||{})};
+  }
+}
+function monthlyObjectiveSums(){ensureObjectiveStructure();return Object.values(S.objectives.monthly).reduce((a,m)=>({gastronomia:a.gastronomia+(Number(m.gastronomia)||0),carni:a.carni+(Number(m.carni)||0),total:a.total+(Number(m.total)||0)}),{gastronomia:0,carni:0,total:0})}
+function useMonthlySumAsAnnual(){
+  const s=monthlyObjectiveSums();S.objectives.annual={...s};save();obj()
+}
+function obj(){
+  ensureObjectiveStructure();
+  const sums=monthlyObjectiveSums(),a=S.objectives.annual;
+  const monthlyRows=OBJ_MONTHS.map((m,i)=>{const k=String(i+1).padStart(2,'0'),x=S.objectives.monthly[k];return`<tr><td><b>${m}</b></td><td><input id="omg${k}" type="number" step=".25" min="0" value="${Number(x.gastronomia)||0}"></td><td><input id="omc${k}" type="number" step=".25" min="0" value="${Number(x.carni)||0}"></td><td><input id="omt${k}" type="number" step=".25" min="0" value="${Number(x.total)||0}"></td></tr>`}).join('');
+  $('#app').innerHTML=`<form class="form" onsubmit="saveObj(event)">
+    <div class="card"><h2>Obiettivi settimanali</h2><p class="muted">Questi valori continuano a essere usati per il calcolo della settimana negli orari.</p><div class="grid"><label>Gastronomia<input id="og" type="number" step=".25" min="0" value="${Number(S.objectives.gastronomia)||0}"></label><label>Carni<input id="oc" type="number" step=".25" min="0" value="${Number(S.objectives.carni)||0}"></label><label class="wide">Totale<input id="ot" type="number" step=".25" min="0" value="${Number(S.objectives.total)||0}"></label></div></div>
+    <div class="card"><div class="row wrap"><div><h2>Obiettivi annuali</h2><small class="muted">Totali dell'anno per reparto e complessivo.</small></div><button class="btn small" type="button" onclick="useMonthlySumAsAnnual()">Usa somma dei mesi</button></div><div class="grid"><label>Gastronomia<input id="oag" type="number" step=".25" min="0" value="${Number(a.gastronomia)||0}"></label><label>Carni<input id="oac" type="number" step=".25" min="0" value="${Number(a.carni)||0}"></label><label class="wide">Totale<input id="oat" type="number" step=".25" min="0" value="${Number(a.total)||0}"></label></div><div class="grid" style="margin-top:10px"><div class="card"><small>Somma 12 mesi · Gastronomia</small><br><b>${hf(sums.gastronomia)}</b></div><div class="card"><small>Somma 12 mesi · Carni</small><br><b>${hf(sums.carni)}</b></div><div class="card wide"><small>Somma 12 mesi · Totale</small><br><b>${hf(sums.total)}</b></div></div></div>
+    <div class="card"><h2>Obiettivi mensili</h2><p class="muted">Inserisci il totale previsto di ogni mese. I valori vengono sommati automaticamente nel riepilogo annuale.</p><div class="scroll"><table class="objective-table"><thead><tr><th>Mese</th><th>Gastronomia</th><th>Carni</th><th>Totale</th></tr></thead><tbody>${monthlyRows}</tbody></table></div></div>
+    <button class="btn primary" type="submit">Salva tutti gli obiettivi</button>
+  </form>`
+}
+function saveObj(e){
+  e.preventDefault();ensureObjectiveStructure();
+  S.objectives.gastronomia=Number($('#og').value)||0;S.objectives.carni=Number($('#oc').value)||0;S.objectives.total=Number($('#ot').value)||0;
+  S.objectives.annual={gastronomia:Number($('#oag').value)||0,carni:Number($('#oac').value)||0,total:Number($('#oat').value)||0};
+  for(let i=1;i<=12;i++){const k=String(i).padStart(2,'0');S.objectives.monthly[k]={gastronomia:Number($(`#omg${k}`).value)||0,carni:Number($(`#omc${k}`).value)||0,total:Number($(`#omt${k}`).value)||0}}
+  save();obj();alert('Obiettivi salvati')
+}
 save();render();
