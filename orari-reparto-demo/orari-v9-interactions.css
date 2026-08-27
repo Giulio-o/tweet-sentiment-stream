@@ -1,7 +1,8 @@
-/* Interazioni, note richieste, permessi e spostamenti */
+/* Interazioni, note richieste, permessi, spostamenti e coperture */
 .btn,.weekbar button,nav button{cursor:pointer;transition:transform .14s ease,box-shadow .14s ease,filter .14s ease,background-color .14s ease}
 .btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px #173f5f24;filter:brightness(.97)}
 .btn:active{transform:translateY(0) scale(.97);box-shadow:0 2px 6px #173f5f20}
+.btn:disabled{cursor:not-allowed;opacity:.55;transform:none!important;box-shadow:none!important;filter:none!important}
 .weekbar button:hover{transform:translateY(-1px);background:#ffffff32}
 nav{grid-template-columns:repeat(7,1fr)}
 nav button:hover{color:var(--b);background:#edf3f6;border-radius:10px;transform:translateY(-2px)}
@@ -11,5 +12,11 @@ nav button:active{transform:scale(.96)}
 .permit-state{background:#f3edff;color:#5f3a90}
 .move-state{background:#eef8f0;color:#21633c}
 .planning-rules textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:11px;background:#fff;resize:vertical;font:inherit;color:#17212b}
-@media(max-width:460px){nav button{font-size:.56rem;padding-left:0;padding-right:0}.request-mini-note{font-size:.64rem}}
+.entitlement-card{border-left-color:#6f42c1;background:#fdfbff}
+.coverage-box{margin-top:11px;padding:11px;border-radius:13px;background:#f7f2ff;border:1px solid #d8c6f1;display:grid;gap:7px}
+.coverage-box>.muted{display:block}
+.coverage-shift{padding-top:8px;border-top:1px solid #dfd3ef;display:grid;gap:6px}
+.coverage-candidate{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:7px 8px}
+.coverage-candidate span{min-width:0}
+@media(max-width:460px){nav button{font-size:.56rem;padding-left:0;padding-right:0}.request-mini-note{font-size:.64rem}.coverage-candidate{align-items:flex-start;flex-direction:column}.coverage-candidate .btn{width:100%}}
 @media(hover:none){.btn:hover,nav button:hover,.weekbar button:hover{transform:none;box-shadow:none;filter:none}}
