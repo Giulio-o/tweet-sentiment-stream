@@ -1,0 +1,15 @@
+/* Interazioni, note richieste, permessi e spostamenti */
+.btn,.weekbar button,nav button{cursor:pointer;transition:transform .14s ease,box-shadow .14s ease,filter .14s ease,background-color .14s ease}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 14px #173f5f24;filter:brightness(.97)}
+.btn:active{transform:translateY(0) scale(.97);box-shadow:0 2px 6px #173f5f20}
+.weekbar button:hover{transform:translateY(-1px);background:#ffffff32}
+nav{grid-template-columns:repeat(7,1fr)}
+nav button:hover{color:var(--b);background:#edf3f6;border-radius:10px;transform:translateY(-2px)}
+nav button:active{transform:scale(.96)}
+.request-mini-note{display:block;margin-top:3px;color:#8a5a00;font-size:.68rem;font-weight:650;line-height:1.25}
+.request-mini-day{margin-top:8px;padding:7px 9px;border-radius:9px;background:#fff8e8;border:1px solid #ead19a}
+.permit-state{background:#f3edff;color:#5f3a90}
+.move-state{background:#eef8f0;color:#21633c}
+.planning-rules textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:11px;background:#fff;resize:vertical;font:inherit;color:#17212b}
+@media(max-width:460px){nav button{font-size:.56rem;padding-left:0;padding-right:0}.request-mini-note{font-size:.64rem}}
+@media(hover:none){.btn:hover,nav button:hover,.weekbar button:hover{transform:none;box-shadow:none;filter:none}}
