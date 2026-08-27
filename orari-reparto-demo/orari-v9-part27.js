@@ -56,13 +56,14 @@ function applyGeneralDailyShiftRules(out){
   const r=dailyShiftRules(),singlePresence=Number(r.singlePresenceMaxMinutes)||435,splitThreshold=Number(r.splitRequiredAfterMinutes)||450;
   out.forEach((day,index)=>{
     const all=[...(day.g||[]).map(s=>({s,dep:'g'})),...(day.c||[]).map(s=>({s,dep:'c'}))];
-    // Un turno unico ordinario non supera 7:15 di presenza. Oltre 7:30 deve essere spezzato.
+    // Turno unico: 7:15 di presenza ordinaria; tra 7:15 e 7:30 solo eccezione/straordinario; oltre 7:30 spezzato obbligatorio.
     all.forEach(({s})=>{
       if(!s?.start||s.start2)return;
-      const scheduled=shiftScheduledMinutes(s);
+      const scheduled=shiftScheduledMinutes(s),text=String(s.skill||'Turno');
       s.generalSinglePresenceOver=scheduled>singlePresence;
       s.generalMustBeSplit=scheduled>splitThreshold;
-      if(s.generalMustBeSplit&&!String(s.skill||'').includes('deve essere spezzato'))s.skill=String(s.skill||'Turno')+' · oltre 7:30: deve essere spezzato';
+      if(s.generalMustBeSplit&&!text.includes('deve essere spezzato'))s.skill=text+' · oltre 7:30: deve essere spezzato';
+      else if(s.generalSinglePresenceOver&&!text.includes('oltre 7:15'))s.skill=text+' · oltre 7:15: eccezione/straordinario';
     });
     // La stessa persona non può fare un lungo mattutino e un lungo serale nello stesso giorno.
     const names=[...new Set(all.map(x=>x.s?.name).filter(n=>n&&n!=='SCOPERTO'))];
@@ -87,8 +88,9 @@ build=function(){return applyGeneralDailyShiftRules(buildBeforeGeneralDailyShift
 const generalRulesPanelBeforeDaily=generalRulesPanel;
 generalRulesPanel=function(){
   const html=generalRulesPanelBeforeDaily(),r=dailyShiftRules();
-  const extra=`<div class="req"><span>Turno unico ordinario · presenza max</span><b>${hf(r.singlePresenceMaxMinutes/60)} con pausa</b></div><div class="req"><span>Oltre questa presenza</span><b>${hf(r.splitRequiredAfterMinutes/60)} → spezzato</b></div><div class="req"><span>Doppio lungo nello stesso giorno</span><b>vietato mattina + sera</b></div>`;
-  return html.replace('</div>',extra+'</div>');
+  const extra=`<div class="req"><span>Turno unico ordinario · presenza max</span><b>${hf(r.singlePresenceMaxMinutes/60)} con pausa</b></div><div class="req"><span>Tra 7:15 e 7:30</span><b>solo eccezione/straordinario</b></div><div class="req"><span>Oltre 7:30 di presenza</span><b>spezzato obbligatorio</b></div><div class="req"><span>Doppio lungo nello stesso giorno</span><b>vietato mattina + sera</b></div>`;
+  const i=html.lastIndexOf('</div>');
+  return i>=0?html.slice(0,i)+extra+html.slice(i):html+extra;
 };
 
 // Anche l'aggiunta manuale del PDV1 rispetta i limiti generali.
@@ -98,7 +100,7 @@ if(typeof pdv1349PromptShift==='function'){
     const draft=pdv1349PromptShiftBeforeDaily(existing);if(!draft)return null;
     const r=dailyShiftRules(),scheduled=shiftScheduledMinutes(draft),split=Boolean(draft.start2&&draft.end2);
     if(!split&&scheduled>Number(r.splitRequiredAfterMinutes||450)){alert('Oltre 7:30 di presenza il turno deve essere spezzato.');return null}
-    if(!split&&scheduled>Number(r.singlePresenceMaxMinutes||435)&&!confirm('Il turno unico supera 7:15 di presenza. Continuare solo come eccezione/straordinario?'))return null;
+    if(!split&&scheduled>Number(r.singlePresenceMaxMinutes||435)&&!confirm('Il turno unico supera 7:15 di presenza. Può essere salvato solo come eccezione/straordinario. Continuare?'))return null;
     return draft;
   };
 }
