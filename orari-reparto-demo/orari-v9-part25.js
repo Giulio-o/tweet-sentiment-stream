@@ -36,19 +36,17 @@ function ensureEntitlementAbsences(){
 }
 function entitlementOriginalShifts(r){
   const name=entitlementEmployee(r),date=entitlementDate(r);if(!name||!date)return[];
-  ensureSpecialState();
-  const saved=S.absences;
+  ensureSpecialState();const saved=S.absences,oldWeek=week;
   try{
     S.absences=saved.filter(x=>!(x.name===name&&x.date===date&&(/104|sindacal/i.test(String(x.type||''))||String(x.requestId||'')===String(r.id))));
-    const monday=mon(new Date(date+'T12:00:00')),oldWeek=week;week=monday;
-    const ds=edited(build()),day=ds.find(d=>key(d.date)===date);week=oldWeek;
-    if(!day)return[];
+    week=mon(new Date(date+'T12:00:00'));
+    const ds=edited(build()),day=ds.find(d=>key(d.date)===date);if(!day)return[];
     const out=[];
     if(day.cr?.name===name)out.push({...day.cr,dep:'cr',skill:day.cr.note||'CR'});
     (day.g||[]).filter(s=>s.name===name).forEach(s=>out.push({...s,dep:'g'}));
     (day.c||[]).filter(s=>s.name===name).forEach(s=>out.push({...s,dep:'c'}));
     return out;
-  }finally{S.absences=saved}
+  }finally{S.absences=saved;week=oldWeek}
 }
 function coverageSkillLevel(e,shift){
   const skill=typeof pdv1RequiredSkill==='function'?pdv1RequiredSkill(shift):'Servizio';
@@ -80,9 +78,6 @@ function coverageCandidates(r,shift){
       return coverageSkillLevel(b,shift)-coverageSkillLevel(a,shift)||ar-br||rotationRank(a)-rotationRank(b);
     }).slice(0,5);
 }
-function coverageFor(requestId,shift,substitute=''){
-  return (telegramCoverages||[]).find(c=>String(c.requestId)===String(requestId)&&c.date===entitlementDate({dateRequested:shift.date||''})&&c.start===shift.start&&c.end===shift.end&&(!substitute||c.substitute===substitute));
-}
 function coverageStatusFor(requestId,date,start,end,substitute){
   return (telegramCoverages||[]).find(c=>String(c.requestId)===String(requestId)&&c.date===date&&c.start===start&&c.end===end&&c.substitute===substitute)||null;
 }
@@ -94,6 +89,10 @@ async function sendCoverageRequest(requestId,absent,date,shift,candidate){
     telegramCoverages.unshift({id:'local_'+Date.now(),pdvId:currentPdvId(),requestId:String(requestId),absent,date,start:shift.start,end:shift.end,dep:shift.dep||'g',skill:shift.skill||'Turno',substitute:candidate,status:'Inviata'});
     requestsPage();setTimeout(loadTelegramRequests,1200);
   }catch(err){alert('Invio richiesta copertura non riuscito: '+(err?.message||err))}
+}
+function sendCoverageRequestFromButton(btn){
+  const d=btn.dataset;
+  sendCoverageRequest(d.requestId,d.absent,d.date,{start:d.start,end:d.end,dep:d.dep,skill:d.skill},d.candidate);
 }
 function applyAcceptedCoverage(){
   ensureSpecialState();S.manualShifts=Array.isArray(S.manualShifts)?S.manualShifts:[];S.coverageAppliedIds=Array.isArray(S.coverageAppliedIds)?S.coverageAppliedIds:[];let changed=false;
@@ -127,8 +126,8 @@ function entitlementCoverageHtml(r){
   if(!absent)return'<div class="coverage-box"><b>Assenza da coprire</b><br><small>Associa prima il profilo Telegram all’addetto.</small></div>';
   if(!date||date==='Da verificare')return'<div class="coverage-box"><b>Assenza da coprire</b><br><small>Data da verificare prima di cercare un sostituto.</small></div>';
   if(!shifts.length)return`<div class="coverage-box"><b>Assenza registrata</b><br><small>Nessun turno originario trovato per ${esc(date)}.</small></div>`;
-  return`<div class="coverage-box"><b>🔎 Copertura immediata</b><small class="muted">104/sindacale: nessuna approvazione. Scegli chi contattare.</small>${shifts.map(shift=>{
-    const candidates=coverageCandidates(r,shift);return`<div class="coverage-shift"><b>${esc(shift.start)}–${esc(shift.end)} · ${esc(shift.skill||'Turno')}</b>${candidates.length?candidates.map(e=>{const linked=telegramLinkForEmployee(e.name),cov=coverageStatusFor(r.id,date,shift.start,shift.end,e.name);const label=cov?esc(cov.status):(linked?'Manda richiesta':'Telegram non collegato');return`<div class="coverage-candidate"><span>${esc(e.name)} <small>· competenza ${coverageSkillLevel(e,shift)}</small></span><button class="btn small ${cov?.status==='Accettata'?'primary':''}" ${(!linked||cov||!telegramCoverageApi)?'disabled':''} onclick="sendCoverageRequest('${esc(r.id)}','${esc(absent)}','${esc(date)}',${JSON.stringify({start:shift.start,end:shift.end,dep:shift.dep||'g',skill:shift.skill||'Turno'}).replace(/"/g,'&quot;')},'${esc(e.name)}')">${label}</button></div>`}).join(''):'<p class="bad">Nessun sostituto compatibile trovato.</p>'}</div>`}).join('')}${!telegramCoverageApi?'<small class="bad">Per inviare davvero i messaggi devi pubblicare la nuova versione del codice Apps Script.</small>':''}</div>`;
+  return`<div class="coverage-box"><b>🔎 Copertura immediata</b><small class="muted">104/sindacale: nessuna approvazione nell'app. Scegli chi contattare.</small>${shifts.map(shift=>{
+    const candidates=coverageCandidates(r,shift);return`<div class="coverage-shift"><b>${esc(shift.start)}–${esc(shift.end)} · ${esc(shift.skill||'Turno')}</b>${candidates.length?candidates.map(e=>{const linked=telegramLinkForEmployee(e.name),cov=coverageStatusFor(r.id,date,shift.start,shift.end,e.name);const label=cov?esc(cov.status):(linked?'Manda richiesta':'Telegram non collegato');return`<div class="coverage-candidate"><span>${esc(e.name)} <small>· competenza ${coverageSkillLevel(e,shift)}</small></span><button class="btn small ${cov?.status==='Accettata'?'primary':''}" data-request-id="${esc(r.id)}" data-absent="${esc(absent)}" data-date="${esc(date)}" data-start="${esc(shift.start)}" data-end="${esc(shift.end)}" data-dep="${esc(shift.dep||'g')}" data-skill="${esc(shift.skill||'Turno')}" data-candidate="${esc(e.name)}" ${(!linked||cov||!telegramCoverageApi)?'disabled':''} onclick="sendCoverageRequestFromButton(this)">${label}</button></div>`}).join(''):'<p class="bad">Nessun sostituto compatibile trovato.</p>'}</div>`}).join('')}${!telegramCoverageApi?'<small class="bad">Per inviare davvero i messaggi devi pubblicare la nuova versione del codice Apps Script.</small>':''}</div>`;
 }
 function enhanceEntitlementCards(){
   const cards=[...document.querySelectorAll('#app .request-card')];
