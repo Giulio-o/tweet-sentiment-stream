@@ -55,10 +55,51 @@ function exportWeeklyTable(){
   if(!w){alert('Il browser ha bloccato la nuova finestra. Consenti i popup per esportare la tabella.');return}
   w.document.open();w.document.write(weeklyExportHtml(ds));w.document.close();
 }
+
+const WEEKLY_EMAIL='giuliopiot123456@gmail.com';
+function emailShiftText(s,dep){
+  if(!s)return'';
+  const times=[s.start&&s.end?`${s.start}-${s.end}`:'',s.start2&&s.end2?`${s.start2}-${s.end2}`:''].filter(Boolean).join(' / ');
+  return `${times}${s.skill?` (${dep==='c'?'C':'G'} · ${s.skill})`:''}`;
+}
+function emailEmployeeDayText(day,e){
+  if(day.holiday?.type==='closed')return'FESTIVO';
+  if(leave(e.name,day.date))return'FERIE';
+  const parts=[];
+  if(day.cr?.name===e.name)parts.push(emailShiftText(day.cr,'g'));
+  (day.g||[]).filter(s=>s.name===e.name).forEach(s=>parts.push(emailShiftText(s,'g')));
+  (day.c||[]).filter(s=>s.name===e.name).forEach(s=>parts.push(emailShiftText(s,'c')));
+  return parts.length?parts.join(' + '):'RIPOSO';
+}
+function weeklyEmailText(ds){
+  const p=typeof currentPdv==='function'?currentPdv():null;
+  const pdv=[p?.name||'PDV',p?.code?`cod. ${p.code}`:''].filter(Boolean).join(' · ');
+  const lines=[`${pdv}`,'',`Orario settimanale ${fmt(ds[0].date)} - ${fmt(ds[6].date)}`,''];
+  S.employees.forEach(e=>{
+    lines.push(`${e.name} · ${hf(exportEmployeeHours(ds,e))} ore`);
+    ds.forEach((d,i)=>lines.push(`  ${DAYS[i]} ${d.date.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}: ${emailEmployeeDayText(d,e)}`));
+    lines.push('');
+  });
+  lines.push('G = Gastro/Forno · C = Carni/Pesce');
+  return lines.join('\n');
+}
+function emailWeeklyTable(){
+  const ds=edited(build()),p=typeof currentPdv==='function'?currentPdv():null;
+  const subject=`Orario ${p?.name||'PDV'} · ${fmt(ds[0].date)} - ${fmt(ds[6].date)}`;
+  const body=weeklyEmailText(ds);
+  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(mobile){
+    location.href=`mailto:${encodeURIComponent(WEEKLY_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return;
+  }
+  const gmail=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(WEEKLY_EMAIL)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const w=window.open(gmail,'_blank');
+  if(!w)location.href=`mailto:${encodeURIComponent(WEEKLY_EMAIL)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 function appendWeeklyExportButton(){
   if(view!=='schedule')return;
   const app=document.getElementById('app');if(!app||document.getElementById('weeklyExportCard'))return;
-  const card=document.createElement('div');card.className='card';card.id='weeklyExportCard';card.innerHTML=`<div class="row wrap"><div><h3>Esporta orario settimanale</h3><small class="muted">Tabella A4 orizzontale con addetti sulle righe, giorni sulle colonne, orari, mansioni e totale ore.</small></div><button class="btn primary" onclick="exportWeeklyTable()">▦ Esporta tabella</button></div>`;app.appendChild(card);
+  const card=document.createElement('div');card.className='card';card.id='weeklyExportCard';card.innerHTML=`<div class="row wrap"><div><h3>Esporta orario settimanale</h3><small class="muted">Tabella A4 orizzontale con addetti sulle righe, giorni sulle colonne, orari, mansioni e totale ore.</small></div><div style="display:grid;gap:8px;min-width:190px"><button class="btn primary" onclick="exportWeeklyTable()">▦ Esporta tabella</button><button class="btn" onclick="emailWeeklyTable()">✉ Manda tabella per mail</button></div></div><small class="muted" style="display:block;margin-top:8px">Destinatario: ${WEEKLY_EMAIL}</small>`;app.appendChild(card);
 }
 const scheduleBeforeWeeklyExport=schedule;
 schedule=function(){scheduleBeforeWeeklyExport();appendWeeklyExportButton()};
