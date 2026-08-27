@@ -44,15 +44,19 @@ try{
   if(installPdv1RealStaffFallback())render();
 }catch(_){}
 
+function jsonpDeploymentError(err){
+  if(String(err?.message||'').includes('Tempo scaduto')){
+    return new Error('Apps Script non restituisce la risposta JSONP. Il deployment va aggiornato alla versione corrente del codice.');
+  }
+  return err;
+}
+
 // Messaggio di errore piu' utile quando il JSONP del deployment non richiama il callback.
 if(typeof requestJsonp==='function'){
   const requestJsonpBeforePdv1Diagnostics=requestJsonp;
-  requestJsonp=function(url){
-    return requestJsonpBeforePdv1Diagnostics(url).catch(err=>{
-      if(String(err?.message||'').includes('Tempo scaduto')){
-        throw new Error('Apps Script non restituisce la risposta JSONP. Il deployment va aggiornato alla versione corrente del codice.');
-      }
-      throw err;
-    });
-  };
+  requestJsonp=function(url){return requestJsonpBeforePdv1Diagnostics(url).catch(err=>{throw jsonpDeploymentError(err)})};
+}
+if(typeof pdvJsonp==='function'){
+  const pdvJsonpBeforePdv1Diagnostics=pdvJsonp;
+  pdvJsonp=function(action,params={}){return pdvJsonpBeforePdv1Diagnostics(action,params).catch(err=>{throw jsonpDeploymentError(err)})};
 }
