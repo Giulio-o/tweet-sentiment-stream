@@ -18,5 +18,7 @@ nav button:active{transform:scale(.96)}
 .coverage-shift{padding-top:8px;border-top:1px solid #dfd3ef;display:grid;gap:6px}
 .coverage-candidate{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:7px 8px}
 .coverage-candidate span{min-width:0}
-@media(max-width:460px){nav button{font-size:.56rem;padding-left:0;padding-right:0}.request-mini-note{font-size:.64rem}.coverage-candidate{align-items:flex-start;flex-direction:column}.coverage-candidate .btn{width:100%}}
+.rest-warning{display:block;margin-top:5px;padding:4px 6px;border-radius:8px;background:#fff3cd;color:#7a4d00;font-size:.68rem;font-weight:800;line-height:1.2}
+.rest-warning.high{background:#fdecea;color:#a02018;border:1px solid #efb4af}
+@media(max-width:460px){nav button{font-size:.56rem;padding-left:0;padding-right:0}.request-mini-note{font-size:.64rem}.coverage-candidate{align-items:flex-start;flex-direction:column}.coverage-candidate .btn{width:100%}.rest-warning{font-size:.64rem}}
 @media(hover:none){.btn:hover,nav button:hover,.weekbar button:hover{transform:none;box-shadow:none;filter:none}}
