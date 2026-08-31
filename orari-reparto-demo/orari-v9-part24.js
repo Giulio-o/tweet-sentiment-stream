@@ -19,14 +19,33 @@ function earliestStartNextDay(prevEnd){
   const rest=Number(generalShiftRules().minimumRestMinutes)||12*60;
   if(prevEnd==null)return 0;return (prevEnd+rest)%(24*60);
 }
+function restGapMinutes(prevEnd,start){return prevEnd==null?24*60:(24*60-prevEnd)+mins(start)}
 function genericRestReplacement(out,index,shift,exclude=[]){
-  const day=out[index],skill=typeof pdv1RequiredSkill==='function'?pdv1RequiredSkill(shift):'Servizio';
+  const day=out[index],skill=typeof pdv1RequiredSkill==='function'?pdv1RequiredSkill(shift):'Servizio',rest=Number(generalShiftRules().minimumRestMinutes)||720;
   let pool=[];
   if(skill==='Macelleria')pool=S.employees.filter(e=>!e.cr&&Number(e.skills?.Macelleria||0)>=2);
   else if(skill==='Pescheria')pool=S.employees.filter(e=>!e.cr&&Number(e.skills?.Pescheria||0)>=1);
   else if(skill==='Forno'||skill==='Ordini')pool=S.employees.filter(e=>!e.cr&&Number(e.skills?.[skill]||0)>=2);
   else pool=S.employees.filter(e=>!e.cr&&Number(e.skills?.Servizio||0)>0);
-  return pool.filter(e=>!exclude.includes(e.name)&&!leave(e.name,day.date)&&(!(typeof blockedAt==='function')||!blockedAt(e.name,day.date,shift.start,shift.end))&&(!(typeof pdv1PersonBusy==='function')||!pdv1PersonBusy(day,e.name,shift.start,shift.end,shift))).sort((a,b)=>(typeof rotationRank==='function'?rotationRank(a)-rotationRank(b):0))[0]?.name||'SCOPERTO';
+  return pool.filter(e=>{
+    if(exclude.includes(e.name)||leave(e.name,day.date))return false;
+    if(typeof blockedAt==='function'&&blockedAt(e.name,day.date,shift.start,shift.end))return false;
+    if(typeof pdv1PersonBusy==='function'&&pdv1PersonBusy(day,e.name,shift.start,shift.end,shift))return false;
+    if(index>0){const pe=personLastEndMinutes(out[index-1],e.name);if(pe!=null&&restGapMinutes(pe,shift.start)<rest)return false}
+    return true;
+  }).sort((a,b)=>{
+    // Katia viene da lontano: a parita' di copertura evitiamo di usarla per una chiusura-apertura.
+    const ak=String(a.name||'').trim()==='Katia'?1:0,bk=String(b.name||'').trim()==='Katia'?1:0;
+    return ak-bk||(typeof rotationRank==='function'?rotationRank(a)-rotationRank(b):0)
+  })[0]?.name||'';
+}
+function markRestException(s,actualGap,rest){
+  s.generalRestWarning=true;s.restException=true;s.generalRestGapMinutes=actualGap;
+  if(String(s.name||'').trim()==='Katia')s.avoidRestException=true;
+  const tag=`eccezione riposo ${hf(actualGap/60)} < ${hf(rest/60)}`;
+  if(!String(s.skill||s.note||'').includes('eccezione riposo')){
+    if(s.skill)s.skill=String(s.skill)+' · '+tag;else s.note=String(s.note||'CR')+' · '+tag;
+  }
 }
 function applyGeneralMinimumRest(out){
   const rest=Number(generalShiftRules().minimumRestMinutes)||12*60;
@@ -35,14 +54,16 @@ function applyGeneralMinimumRest(out){
     ['g','c'].forEach(dep=>(day[dep]||[]).forEach(s=>{
       if(!s?.name||s.name==='SCOPERTO')return;
       const prevEnd=personLastEndMinutes(prev,s.name);if(prevEnd==null)return;
-      const actualGap=(24*60-prevEnd)+mins(s.start);if(actualGap>=rest)return;
-      const old=s.name,exclude=[...new Set([...(day.g||[]),...(day.c||[])].map(x=>x.name))];
-      s.name=genericRestReplacement(out,i,s,exclude);
-      s.skill=String(s.skill||'Turno')+` · riposo minimo ${hf(rest/60)} (${old})`;
-      s.generalRestRule=true;
+      const actualGap=restGapMinutes(prevEnd,s.start);if(actualGap>=rest)return;
+      // La regola e' da rispettare quando possibile, ma puo' essere autorizzata come eccezione.
+      // Il generatore prova prima a trovare un sostituto senza violare il riposo; se non c'e', mantiene il turno e lo evidenzia.
+      const old=s.name,exclude=[...new Set([...(day.g||[]),...(day.c||[])].map(x=>x.name).filter(Boolean))];
+      const replacement=genericRestReplacement(out,i,s,exclude);
+      if(replacement){s.name=replacement;s.restAvoidedFor=old;s.skill=String(s.skill||'Turno')+` · evitata chiusura-apertura (${old})`;s.generalRestRule=true}
+      else markRestException(s,actualGap,rest);
     }));
     if(day.cr){
-      const prevEnd=personLastEndMinutes(prev,day.cr.name);if(prevEnd!=null){const actualGap=(24*60-prevEnd)+mins(day.cr.start);if(actualGap<rest){day.cr.note=String(day.cr.note||'CR')+` · ATTENZIONE riposo ${hf(actualGap/60)} < ${hf(rest/60)}`;day.cr.generalRestWarning=true}}
+      const prevEnd=personLastEndMinutes(prev,day.cr.name);if(prevEnd!=null){const actualGap=restGapMinutes(prevEnd,day.cr.start);if(actualGap<rest)markRestException(day.cr,actualGap,rest)}
     }
   }
   return out;
@@ -59,7 +80,7 @@ if(typeof pdv1349Metrics==='function'){
   };
 }
 
-function generalRulesPanel(){const r=generalShiftRules();return`<div class="card"><h3>Regole generali turni</h3><p class="muted">Valgono per tutti i PDV. Gli orari di apertura, chiusura e mansione restano invece specifici del singolo punto vendita.</p><div class="grid"><label>Turno unico max (ore)<input id="genSingleMax" type="number" min="1" step="0.25" value="${r.singleMaxMinutes/60}"></label><label>Spezzato max (ore)<input id="genSplitMax" type="number" min="1" step="0.25" value="${r.splitMaxMinutes/60}"></label><label>Rientro minimo (ore)<input id="genReturnMin" type="number" min="0.5" step="0.25" value="${r.splitReturnMinMinutes/60}"></label><label>Pausa turno lungo (min)<input id="genPause" type="number" min="0" step="5" value="${r.longShiftPauseMinutes}"></label><label>Riposo minimo tra turni (ore)<input id="genRest" type="number" min="8" step="0.25" value="${r.minimumRestMinutes/60}"></label></div><div class="req"><span>Esempio dinamico</span><b>chiude 20:45 → non prima di ${(()=>{const m=(20*60+45+r.minimumRestMinutes)%(24*60);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')})()}</b></div></div>`}
+function generalRulesPanel(){const r=generalShiftRules();return`<div class="card"><h3>Regole generali turni</h3><p class="muted">Valgono per tutti i PDV. Gli orari di apertura, chiusura e mansione restano invece specifici del singolo punto vendita.</p><div class="grid"><label>Turno unico max (ore)<input id="genSingleMax" type="number" min="1" step="0.25" value="${r.singleMaxMinutes/60}"></label><label>Spezzato max (ore)<input id="genSplitMax" type="number" min="1" step="0.25" value="${r.splitMaxMinutes/60}"></label><label>Rientro minimo (ore)<input id="genReturnMin" type="number" min="0.5" step="0.25" value="${r.splitReturnMinMinutes/60}"></label><label>Pausa turno lungo (min)<input id="genPause" type="number" min="0" step="5" value="${r.longShiftPauseMinutes}"></label><label>Riposo preferito tra turni (ore)<input id="genRest" type="number" min="8" step="0.25" value="${r.minimumRestMinutes/60}"></label></div><div class="req"><span>Esempio</span><b>20:45 + ${hf(r.minimumRestMinutes/60)} → ${(()=>{const m=(20*60+45+r.minimumRestMinutes)%(24*60);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')})()}</b></div><small class="muted">Il generatore evita la chiusura-apertura quando trova una soluzione equivalente. Se serve davvero, la mantiene come eccezione evidenziata: non e' piu' un blocco assoluto.</small></div>`}
 const pdvRulesPageBeforeGeneralStructured=pdvRulesPage;
 pdvRulesPage=function(){
   pdvRulesPageBeforeGeneralStructured();const form=document.querySelector('#app form'),actions=form?.lastElementChild;if(!form)return;actions?.insertAdjacentHTML('beforebegin',generalRulesPanel());
@@ -78,10 +99,9 @@ savePdvRules=function(e,id){
   return savePdvRulesBeforeGeneralStructured(e,id);
 };
 
-// Corregge il testo del profilo PDV1: 08:45 e' derivato, non una regola autonoma del negozio.
 const pdvRulesPageBeforeRestLabel=pdvRulesPage;
 pdvRulesPage=function(){
   pdvRulesPageBeforeRestLabel();if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
-  [...document.querySelectorAll('#app .card p.muted')].forEach(p=>{if(String(p.textContent||'').includes('20:45 non può iniziare prima delle 08:45'))p.innerHTML='Il <b>riposo minimo tra turni</b> è una regola generale. Nel PDV 349, con chiusura alle 20:45 e riposo generale di 12h, l’entrata minima risultante è 08:45.'});
+  [...document.querySelectorAll('#app .card p.muted')].forEach(p=>{if(String(p.textContent||'').includes('20:45 non può iniziare prima delle 08:45'))p.innerHTML='Il <b>riposo preferito tra turni</b> e una regola generale. Nel PDV 349, con chiusura alle 20:45 e 12h di riposo, l’entrata ideale e 08:45; una chiusura-apertura resta possibile solo come eccezione evidenziata.'});
 };
 try{generalShiftRules();render()}catch(_){}
