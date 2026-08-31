@@ -1,193 +1,157 @@
-// PDV 1 / 349 - settimana pubblicata 07-13/09/2026 e modello operativo reale.
-const PDV1_REFERENCE_WEEK_START='2026-09-07';
-const PDV1_REFERENCE_WEEK_END='2026-09-13';
-const PDV1_REFERENCE_SOURCE='Orario pubblicato 27/08/2026 · settimana 07-13/09/2026';
+// PDV 1 / 349 - settimana reale 07-13/09/2026 usata come modello di pianificazione.
+const PDV1_REFERENCE_WEEK={from:'2026-09-07',to:'2026-09-13',version:'pdv1-ref-20260907-v2'};
 
-const PDV1_REFERENCE_DAYS={
-  '2026-09-07':{
-    g:[
-      ['Katia ','06:30','13:30','Gastronomia'],['Stefano','07:15','14:00','Gastronomia'],
-      ['Massimo','14:00','20:45','Chiusura Gastronomia'],['Antonio','15:15','20:45','Chiusura Gastronomia'],
-      ['Marine','06:00','13:00','Gastronomia']
-    ],
-    c:[['Gabriele','06:30','13:30','Carni']],
-    cr:['08:00','14:00','','','Gastronomia · CR'],
-    external:[['Maia','10:00','14:00','Generi Vari']]
-  },
-  '2026-09-08':{
-    g:[
-      ['Katia ','13:30','20:45','Chiusura Gastronomia'],['Stefano','06:30','13:30','Gastronomia'],
-      ['Miriam','06:00','13:00','Gastronomia'],['Gianmarco','13:30','20:45','Gastronomia · supporto da Carni']
-    ],
-    c:[['Gabriele','07:00','13:00','Carni']],
-    cr:['06:00','11:00','13:00','15:30','Gastronomia · CR · spezzato'],external:[]
-  },
-  '2026-09-09':{
-    g:[
-      ['Katia ','07:00','14:00','Gastronomia'],['Stefano','06:30','13:30','Gastronomia'],
-      ['Antonio','06:00','13:00','Gastronomia'],['Marine','17:00','20:45','Chiusura Gastronomia · giorno basso']
-    ],
-    c:[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','17:15','Carni · straordinario']],
-    cr:['16:00','20:45','','','Chiusura Gastronomia · CR · giorno basso'],
-    external:[['Maia','16:30','20:45','Generi Vari']]
-  },
-  '2026-09-10':{
-    g:[
-      ['Katia ','06:00','13:00','Gastronomia'],['Stefano','07:30','13:30','Gastronomia'],
-      ['Massimo','13:30','20:45','Chiusura Gastronomia'],['Marine','13:30','20:45','Chiusura Gastronomia']
-    ],
-    c:[['Gabriele','07:00','12:00','Carni','14:00','16:30']],
-    cr:['08:00','14:00','','','Gastronomia · CR'],external:[['Maia','15:30','20:45','Generi Vari']]
-  },
-  '2026-09-11':{
-    g:[
-      ['Stefano','15:00','20:45','Chiusura Gastronomia'],['Massimo','14:00','20:45','Chiusura Gastronomia'],
-      ['Antonio','06:30','12:00','Gastronomia'],['Marine','06:00','13:00','Gastronomia'],['Miriam','09:30','14:00','Gastronomia']
-    ],
-    c:[['Katia ','07:00','14:00','Carni'],['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:00','Carni']],
-    cr:['06:00','12:00','','','Gastronomia · CR'],external:[['Maia','09:15','13:00','Generi Vari']]
-  },
-  '2026-09-12':{
-    g:[
-      ['Katia ','14:30','20:45','Chiusura Gastronomia'],['Stefano','06:30','13:30','Gastronomia'],
-      ['Antonio','06:00','13:00','Gastronomia'],['Marine','14:30','20:45','Chiusura Gastronomia'],['Miriam','07:00','13:30','Gastronomia']
-    ],
-    c:[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:30','Carni']],
-    cr:['11:00','13:30','15:30','20:45','Gastronomia · CR · spezzato'],external:[['Maia','10:00','14:00','Generi Vari']]
-  },
-  '2026-09-13':{
-    g:[['Stefano','07:00','13:15','Domenica · straordinario'],['Miriam','07:00','13:15','Domenica · straordinario']],
-    c:[],cr:null,external:[]
-  }
+function refEmp(label){
+  const t=String(label||'').trim().toLowerCase();
+  if(t==='giulio')return S.employees.find(e=>e.cr)?.name||'Giulio CR';
+  return S.employees.find(e=>String(e.name||'').trim().toLowerCase()===t)?.name||label;
+}
+function refPause(start,end,start2='',end2=''){
+  const total=Math.max(0,mins(end)-mins(start))+(start2&&end2?Math.max(0,mins(end2)-mins(start2)):0);
+  return total>6*60?15:0;
+}
+function refShift(name,start,end,skill,extra={}){
+  const s={name:refEmp(name),start,end,skill,pause:refPause(start,end,extra.start2||'',extra.end2||''),referenceModel:true,source:'Modello reale 7-13 settembre',...extra};
+  if(s.start2&&s.end2)s.pause=refPause(start,end,s.start2,s.end2);
+  return s;
+}
+function refDay(g=[],c=[],cr=null,note=''){return{g,c,cr,note}}
+
+// Trascrizione dell'orario pubblicato caricato su Drive.
+const PDV1_REAL_ROSTER={
+  '2026-09-07':refDay([
+    ['Katia','06:30','13:30','Gastro mattina'],['Stefano','07:15','14:00','Gastro mattina'],['Massimo','14:00','20:45','Chiusura'],['Antonio','15:15','20:45','Chiusura'],['Marine','06:00','13:00','Gastro mattina']
+  ],[['Gabriele','06:30','13:30','Carni']],['Giulio','08:00','14:00','CR'],'Miriam: permesso sindacale · Maia: Generi Vari'),
+  '2026-09-08':refDay([
+    ['Gianmarco','13:30','20:45','Chiusura Gastro'],['Katia','13:30','20:45','Chiusura'],['Stefano','06:30','13:30','Gastro mattina'],['Miriam','06:00','13:00','Gastro mattina']
+  ],[['Gabriele','07:00','13:00','Carni']],['Giulio','06:00','11:00','CR',{start2:'13:00',end2:'15:30'}],'Marine: permesso 104'),
+  '2026-09-09':refDay([
+    ['Katia','07:00','14:00','Gastro mattina'],['Stefano','06:30','13:30','Gastro mattina'],['Antonio','06:00','13:00','Gastro mattina'],['Marine','17:00','20:45','Chiusura leggera']
+  ],[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','17:15','Carni · straordinario']],['Giulio','16:00','20:45','CR'],'Giorno basso: chiusura volutamente leggera CR + Marine'),
+  '2026-09-10':refDay([
+    ['Katia','06:00','13:00','Gastro mattina'],['Stefano','07:30','13:30','Gastro mattina'],['Massimo','13:30','20:45','Chiusura'],['Marine','13:30','20:45','Chiusura']
+  ],[['Gabriele','07:00','12:00','Carni',{start2:'14:00',end2:'16:30'}]],['Giulio','08:00','14:00','CR'],'Maia: Generi Vari'),
+  '2026-09-11':refDay([
+    ['Stefano','15:00','20:45','Chiusura'],['Massimo','14:00','20:45','Chiusura'],['Antonio','06:30','12:00','Gastro mattina'],['Marine','06:00','13:00','Gastro mattina'],['Miriam','09:30','14:00','Gastro mattina']
+  ],[['Katia','07:00','14:00','Supporto Carni'],['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:00','Carni pomeriggio']],['Giulio','06:00','12:00','CR'],'Maia: Generi Vari'),
+  '2026-09-12':refDay([
+    ['Katia','14:30','20:45','Chiusura'],['Stefano','06:30','13:30','Gastro mattina'],['Antonio','06:00','13:00','Gastro mattina'],['Marine','14:30','20:45','Chiusura'],['Miriam','07:00','13:30','Gastro mattina']
+  ],[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:30','Carni pomeriggio']],['Giulio','11:00','13:30','CR',{start2:'15:30',end2:'20:45'}],'Maia: Generi Vari'),
+  '2026-09-13':refDay([
+    ['Stefano','07:00','13:15','Domenica'],['Miriam','07:00','13:15','Domenica']
+  ],[],null,'Domenica: 2 addetti 07:00-13:15')
 };
 
-function pdv1ReferenceShift(row,dep){
-  const [name,start,end,skill,start2='',end2='']=row;
-  return{name,start,end,start2,end2,skill,pause:0,publishedReference:true,referenceSource:PDV1_REFERENCE_SOURCE,_dep:dep};
-}
-function pdv1ReferenceWeekActive(){return typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'&&key(week)===PDV1_REFERENCE_WEEK_START}
-function pdv1ApplyReferenceWeek(out){
-  if(!pdv1ReferenceWeekActive())return out;
-  out.forEach(day=>{
-    const k=key(day.date),ref=PDV1_REFERENCE_DAYS[k];if(!ref)return;
-    day.g=(ref.g||[]).map(x=>pdv1ReferenceShift(x,'g'));
-    day.c=(ref.c||[]).map(x=>pdv1ReferenceShift(x,'c'));
-    day.cr=ref.cr?{name:S.employees.find(e=>e.cr)?.name||'Giulio CR',start:ref.cr[0],end:ref.cr[1],start2:ref.cr[2]||'',end2:ref.cr[3]||'',note:ref.cr[4]||'CR',pause:0,publishedReference:true,referenceSource:PDV1_REFERENCE_SOURCE}:null;
-    day.publishedReference=true;
-  });
-  return out;
-}
+const PDV1_EXTERNAL_REFERENCE={
+  '2026-09-07':[{name:'Maia',start:'10:00',end:'14:00',destination:'Generi Vari'}],
+  '2026-09-09':[{name:'Maia',start:'16:30',end:'20:45',destination:'Generi Vari'}],
+  '2026-09-10':[{name:'Maia',start:'15:30',end:'20:45',destination:'Generi Vari'}],
+  '2026-09-11':[{name:'Maia',start:'09:15',end:'13:00',destination:'Generi Vari'}],
+  '2026-09-12':[{name:'Maia',start:'10:00',end:'14:00',destination:'Generi Vari'}]
+};
 
-// Prima importazione: elimina soltanto le vecchie correzioni provvisorie della stessa settimana.
-function pdv1SeedReferenceModel(){
+function inPdv1ReferenceDate(k){return k>=PDV1_REFERENCE_WEEK.from&&k<=PDV1_REFERENCE_WEEK.to}
+function migratePdv1ReferenceWeekState(){
   if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
-  if(S.referenceWeekModel?.source===PDV1_REFERENCE_SOURCE)return;
-  const inWeek=d=>d>=PDV1_REFERENCE_WEEK_START&&d<=PDV1_REFERENCE_WEEK_END;
-  S.manualShifts=(S.manualShifts||[]).filter(x=>!inWeek(String(x.date||'')));
-  S.edits=Object.fromEntries(Object.entries(S.edits||{}).filter(([k])=>!/^2026-09-(0[7-9]|1[0-3])-/.test(k)));
-  S.crEdits=Object.fromEntries(Object.entries(S.crEdits||{}).filter(([k])=>!inWeek(k)));
-  S.referenceWeekModel={
-    source:PDV1_REFERENCE_SOURCE,weekStart:PDV1_REFERENCE_WEEK_START,
-    closeOpen:{preferredRestHours:12,hardBlock:false,highlightExceptions:true,avoidFor:['Katia ']},
-    wednesday:{traffic:'basso',closingTotal:2,note:'Quando chiude il CR: CR + 1 addetto può essere sufficiente.'},
-    sunday:{count:2,start:'07:00',end:'13:15'},
-    externalShifts:Object.fromEntries(Object.entries(PDV1_REFERENCE_DAYS).map(([d,x])=>[d,x.external||[]]))
-  };
+  if(S.referenceWeekMigration===PDV1_REFERENCE_WEEK.version)return;
+  S.edits=S.edits||{};Object.keys(S.edits).forEach(k=>{if(inPdv1ReferenceDate(k.slice(0,10)))delete S.edits[k]});
+  S.crEdits=S.crEdits||{};Object.keys(S.crEdits).forEach(k=>{if(inPdv1ReferenceDate(k))delete S.crEdits[k]});
+  S.manualShifts=Array.isArray(S.manualShifts)?S.manualShifts.filter(x=>!inPdv1ReferenceDate(String(x.date||''))):[];
+  // Una vecchia richiesta approvata non deve alterare retroattivamente l'orario pubblicato: resta solo nota.
+  S.availabilityBlocks=Array.isArray(S.availabilityBlocks)?S.availabilityBlocks.filter(x=>!inPdv1ReferenceDate(String(x.date||''))):[];
+  S.referenceWeekMigration=PDV1_REFERENCE_WEEK.version;
   S.planningRules=S.planningRules||{};S.planningRules.people=S.planningRules.people||{};
-  S.planningRules.people['Katia ']={...(S.planningRules.people['Katia ']||{}),avoidCloseOpen:true,note:'Viene da lontano: evitare chiusura-apertura salvo necessità.'};
-  save();
+  const katia=refEmp('Katia');S.planningRules.people[katia]={...(S.planningRules.people[katia]||{}),avoidCloseOpen:true,note:'Viene da lontano: evitare chiusura-apertura salvo necessita.'};
 }
-
-// Il vecchio vincolo 12h poteva trasformare il turno in SCOPERTO: se non esiste alternativa, ripristina l'addetto e segnala l'eccezione.
-function restoreSoftRestFallback(out){
-  out.forEach(day=>['g','c'].forEach(dep=>(day[dep]||[]).forEach(s=>{
-    if(s.name!=='SCOPERTO')return;
-    const m=String(s.skill||'').match(/riposo minimo[^()]*\(([^)]+)\)/i);if(!m)return;
-    s.name=m[1];s.skill=String(s.skill||'Turno').replace(/ · riposo minimo[^()]*\([^)]+\)/i,'');s.restFallbackRestored=true;
-  })));
-  return out;
-}
-function pdv1RestGap(out,index,name,start){
-  if(index<=0)return null;const prevEnd=typeof personLastEndMinutes==='function'?personLastEndMinutes(out[index-1],name):null;
-  return prevEnd==null?null:(24*60-prevEnd)+mins(start);
-}
-function pdv1CandidateForRest(out,index,shift,oldName){
-  const day=out[index],rest=Number(typeof generalShiftRules==='function'?generalShiftRules().minimumRestMinutes:720)||720;
-  const skill=typeof generalRequiredSkill==='function'?generalRequiredSkill(shift):(typeof pdv1RequiredSkill==='function'?pdv1RequiredSkill(shift):'Servizio');
-  let pool=S.employees.filter(e=>!e.cr&&e.name!==oldName);
-  pool=pool.filter(e=>{
-    const v=Number(e.skills?.[skill]||0);if((skill==='Forno'||skill==='Ordini'||skill==='Macelleria')&&v<2)return false;if(skill==='Pescheria'&&v<1)return false;if(skill==='Servizio'&&Number(e.skills?.Servizio||0)<1)return false;
-    if(leave(e.name,day.date))return false;if(typeof blockedAt==='function'&&blockedAt(e.name,day.date,shift.start,shift.end))return false;
-    if(typeof employeeBusy==='function'&&employeeBusy(day,e.name,shift.start,shift.end))return false;
-    const gap=pdv1RestGap(out,index,e.name,shift.start);return gap==null||gap>=rest;
-  });
-  pool.sort((a,b)=>((String(a.name).trim()==='Katia')?1000:0)-((String(b.name).trim()==='Katia')?1000:0)||(typeof rotationRank==='function'?rotationRank(a)-rotationRank(b):0));
-  return pool[0]||null;
-}
-function pdv1MarkOrMinimizeCloseOpen(out,{published=false}={}){
-  const rest=Number(typeof generalShiftRules==='function'?generalShiftRules().minimumRestMinutes:720)||720;
+function refBuildShift(row,dep){const [name,start,end,skill,extra={}]=row;return refShift(name,start,end,skill,{...extra,_dep:dep})}
+function annotateReferenceRest(out){
+  const rest=typeof generalShiftRules==='function'?Number(generalShiftRules().minimumRestMinutes)||720:720;
   for(let i=1;i<out.length;i++){
-    const day=out[i];
+    const prev=out[i-1],day=out[i];
     ['g','c'].forEach(dep=>(day[dep]||[]).forEach(s=>{
-      if(!s?.name||s.name==='SCOPERTO')return;const gap=pdv1RestGap(out,i,s.name,s.start);if(gap==null||gap>=rest)return;
-      const old=s.name;
-      if(!published){const replacement=pdv1CandidateForRest(out,i,s,old);if(replacement){s.name=replacement.name;s.skill=String(s.skill||'Turno')+` · evita chiusura-apertura (${old})`;s.restRuleOptimized=true;return}}
-      s.restWarning=true;s.restGapMinutes=gap;s.restPreferredMinutes=rest;
-      if(String(old).trim()==='Katia')s.restWarningPriority='high';
+      const pe=typeof personLastEndMinutes==='function'?personLastEndMinutes(prev,s.name):null;if(pe==null)return;
+      const gap=(24*60-pe)+mins(s.start);if(gap>=rest)return;
+      if(typeof markRestException==='function')markRestException(s,gap,rest);else{s.restException=true;s.generalRestGapMinutes=gap}
     }));
-    if(day.cr){const gap=pdv1RestGap(out,i,day.cr.name,day.cr.start);if(gap!=null&&gap<rest){day.cr.restWarning=true;day.cr.restGapMinutes=gap;day.cr.note=String(day.cr.note||'CR')+` · ⚠ chiusura-apertura ${hf(gap/60)}`}}
+    if(day.cr){const pe=typeof personLastEndMinutes==='function'?personLastEndMinutes(prev,day.cr.name):null;if(pe!=null){const gap=(24*60-pe)+mins(day.cr.start);if(gap<rest){if(typeof markRestException==='function')markRestException(day.cr,gap,rest);else{day.cr.restException=true;day.cr.generalRestGapMinutes=gap}}}}
   }
   return out;
 }
+function applyPdv1ReferenceWeek(out){
+  if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return out;
+  migratePdv1ReferenceWeekState();let touched=false;
+  out.forEach(day=>{
+    const k=key(day.date),src=PDV1_REAL_ROSTER[k];if(!src)return;touched=true;
+    day.g=(src.g||[]).map(x=>refBuildShift(x,'g'));day.c=(src.c||[]).map(x=>refBuildShift(x,'c'));
+    day.cr=src.cr?refShift(src.cr[0],src.cr[1],src.cr[2],src.cr[3],{...(src.cr[4]||{}),note:src.cr[3],referenceModel:true}):null;
+    day.referenceModel=true;day.referenceNote=src.note||'';
+  });
+  return touched?annotateReferenceRest(out):out;
+}
 
-// Mercoledì del 349: giorno basso. Il modello accetta 2 persone totali in chiusura.
-function pdv1ApplyReferenceLowWednesday(out){
-  if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001')||pdv1ReferenceWeekActive())return out;
-  const close=String(S.rules?.closingTime||'20:45');const day=out[2];if(!day||day.holiday?.type==='closed')return out;
-  const crCloses=day.cr&&shiftSegments(day.cr).some(([,b])=>b===mins(close));
-  const closers=(day.g||[]).filter(s=>shiftSegments(s).some(([,b])=>b===mins(close))&&String(s.skill||'').toLowerCase().includes('chiusura'));
-  const allowedNonCr=crCloses?1:2;
-  if(closers.length>allowedNonCr){
-    const keep=[...closers].sort((a,b)=>mins(b.start)-mins(a.start)).slice(0,allowedNonCr);
-    const keepSet=new Set(keep);day.g=(day.g||[]).filter(s=>!closers.includes(s)||keepSet.has(s));
-    keep.forEach(s=>s.skill=String(s.skill||'Chiusura')+' · modello mercoledì basso');
-  }
+// Mercoledi' e' un giorno basso nel 349: quando chiude il CR, basta un solo altro chiusurista se non ci sono esigenze speciali.
+function applyPdv1WednesdayLeanClose(out){
+  if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return out;
+  const close=String(S.rules?.closingTime||'20:45');
+  out.forEach(day=>{
+    if(day.date.getDay()!==3||day.referenceModel||!day.cr)return;
+    const crCloses=shiftSegments(day.cr).some(([,b])=>b===mins(close));if(!crCloses)return;
+    const closers=(day.g||[]).filter(s=>String(s.end||'')===close&&String(s.skill||'').toLowerCase().includes('chiusura'));
+    if(closers.length<=1)return;
+    const keep=closers.find(s=>String(s.name||'').trim()==='Marine')||closers[0];
+    day.g=day.g.filter(s=>!closers.includes(s)||s===keep);day.referenceNote='Mercoledi giorno basso: chiusura leggera CR + 1 addetto';day.leanWednesday=true;
+  });
   return out;
 }
+const buildBeforeReferenceModel=build;
+build=function(){return applyPdv1ReferenceWeek(applyPdv1WednesdayLeanClose(buildBeforeReferenceModel()))};
 
-const buildBeforeReferenceWeek=build;
-build=function(){
-  let out=buildBeforeReferenceWeek();
-  out=restoreSoftRestFallback(out);
-  out=pdv1ApplyReferenceLowWednesday(out);
-  if(pdv1ReferenceWeekActive())out=pdv1ApplyReferenceWeek(out);
-  return pdv1MarkOrMinimizeCloseOpen(out,{published:pdv1ReferenceWeekActive()});
-};
-
-function restWarningHtml(s){
-  if(!s?.restWarning)return'';const high=s.restWarningPriority==='high';
-  return`<small class="rest-warning ${high?'high':''}">⚠ Chiusura→apertura: ${hf(Number(s.restGapMinutes||0)/60)} di riposo${high?' · da evitare per Katia':''}</small>`;
+function restExceptionText(s){
+  if(!s?.restException)return'';const g=Number(s.generalRestGapMinutes)||0,rest=typeof generalShiftRules==='function'?Number(generalShiftRules().minimumRestMinutes)||720:720;
+  return`⚠ Chiusura-apertura: riposo ${hf(g/60)} (preferito ${hf(rest/60)})${String(s.name||'').trim()==='Katia'?' · evitare per Katia':''}`;
 }
-const shiftRowBeforeReferenceWarning=shiftRow;
-shiftRow=function(s,d,dep,i){let html=shiftRowBeforeReferenceWarning(s,d,dep,i),w=restWarningHtml(s);return w?html.replace('</span>',`</span>${w}`):html};
-const employeeShiftHtmlBeforeReferenceWarning=employeeShiftHtml;
-employeeShiftHtml=function(s,day){let html=employeeShiftHtmlBeforeReferenceWarning(s,day),w=restWarningHtml(s);return w?html.replace('</small>',`</small>${w}`):html};
+const shiftRowBeforeReferenceModel=shiftRow;
+shiftRow=function(s,d,dep,i){let html=shiftRowBeforeReferenceModel(s,d,dep,i),txt=restExceptionText(s);if(!txt)return html;return html.replace('</div><div class="time">',`<small class="rest-exception-note">${esc(txt)}</small></div><div class="time">`)};
 
-// Mostra gli orari reali di Maia nei Generi Vari senza contarli nelle ore del reparto.
-const employeeWeekPageBeforeReferenceExternal=employeeWeekPage;
+function referenceDayWarnings(ds,index){const day=ds[index],arr=[...(day.g||[]),...(day.c||[])];if(day.cr)arr.push(day.cr);return arr.filter(s=>s.restException).map(restExceptionText)}
+function decorateReferenceSchedule(){
+  if(view!=='schedule'||!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
+  const ds=edited(build()),ref=key(week)===PDV1_REFERENCE_WEEK.from,app=document.getElementById('app');if(!app)return;
+  if(ref&&!document.getElementById('referenceWeekCard')){
+    const sections=[...app.querySelectorAll('section.card')],anchor=sections[0];
+    const ext=Object.entries(PDV1_EXTERNAL_REFERENCE).map(([d,rows])=>rows.map(x=>`${d.slice(8,10)}/09 ${x.start}-${x.end}`).join('')).join(' · ');
+    const card=document.createElement('div');card.id='referenceWeekCard';card.className='card reference-week-card';card.innerHTML=`<div class="row wrap"><div><h3>Settimana modello reale · 7-13 settembre</h3><small>Orario pubblicato usato come riferimento per il PDV 349.</small></div><span class="pill">MODELLO</span></div><p><b>Maia → Generi Vari:</b> ${esc(ext)}</p><small class="muted">Le chiusure-aperture presenti nel modello restano visibili come eccezioni. Nelle settimane nuove il motore prova prima a evitarle.</small>`;
+    if(anchor)app.insertBefore(card,anchor);else app.appendChild(card);
+  }
+  [...app.querySelectorAll('section.card')].forEach((section,i)=>{
+    const day=ds[i];if(!day)return;const notes=[];if(day.referenceNote)notes.push(day.referenceNote);notes.push(...referenceDayWarnings(ds,i));
+    if(notes.length&&!section.querySelector('.reference-day-note'))section.querySelector('.row')?.insertAdjacentHTML('afterend',`<div class="reference-day-note">${notes.map(x=>`<small>${esc(x)}</small>`).join('')}</div>`);
+  });
+}
+const scheduleBeforeReferenceDecor=schedule;
+schedule=function(){scheduleBeforeReferenceDecor();decorateReferenceSchedule()};
+
+const employeeWeekBeforeReferenceDecor=employeeWeekPage;
 employeeWeekPage=function(name){
-  employeeWeekPageBeforeReferenceExternal(name);if(!pdv1ReferenceWeekActive()||String(employeeWeekName).trim()!=='Maia')return;
+  employeeWeekBeforeReferenceDecor(name);if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
+  const emp=S.employees.find(e=>e.name===employeeWeekName);if(!emp)return;const ds=edited(build());
   [...document.querySelectorAll('#app .employee-day')].forEach((card,i)=>{
-    const d=key(add(week,i)),ext=(PDV1_REFERENCE_DAYS[d]?.external||[]).find(x=>String(x[0]).trim()==='Maia');if(!ext)return;
-    const state=card.querySelector('.move-state,.rest-state,.leave-state');if(state)state.innerHTML=`<b>Spostato → Generi Vari</b><br><span class="time">${esc(ext[1])}–${esc(ext[2])}</span><br><small>Orario pubblicato · non conteggiato nel reparto</small>`;
+    const day=ds[i];if(!day)return,shifts=employeeDayShifts(day,emp.name),warn=shifts.filter(s=>s.restException).map(restExceptionText);
+    if(day.cr?.name===emp.name&&day.cr.restException)warn.push(restExceptionText(day.cr));
+    const ext=(PDV1_EXTERNAL_REFERENCE[key(day.date)]||[]).find(x=>refEmp(x.name)===emp.name);
+    if(ext&&!card.querySelector('.external-reference-shift'))card.insertAdjacentHTML('beforeend',`<div class="external-reference-shift"><b>${esc(ext.destination)}</b> · ${esc(ext.start)}-${esc(ext.end)}<br><small>Turno fuori reparto · settimana modello</small></div>`);
+    if(warn.length&&!card.querySelector('.rest-exception-note'))card.insertAdjacentHTML('beforeend',warn.map(x=>`<small class="rest-exception-note">${esc(x)}</small>`).join(''));
   });
 };
 
-const pdvRulesPageBeforeReferenceModel=pdvRulesPage;
+const pdvRulesBeforeReferenceModel=pdvRulesPage;
 pdvRulesPage=function(){
-  pdvRulesPageBeforeReferenceModel();if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
-  const form=document.querySelector('#app form'),actions=form?.lastElementChild;if(!form||document.getElementById('referenceWeekCard'))return;
-  actions?.insertAdjacentHTML('beforebegin',`<div class="card" id="referenceWeekCard"><h3>Modello reale · 7–13 settembre</h3><p class="muted">Derivato dall’orario pubblicato del negozio 349 e usato come riferimento per le settimane successive.</p><div class="req"><span>Chiusura→apertura sotto 12h</span><b>evitare; se necessaria evidenziare ⚠</b></div><div class="req"><span>Katia</span><b>evitare in modo prioritario</b></div><div class="req"><span>Mercoledì · giorno basso</span><b>chiusura totale 2 persone</b></div><div class="req"><span>Domenica</span><b>2 addetti · 07:00–13:15</b></div></div>`);
+  pdvRulesBeforeReferenceModel();const p=pdvDb?.pdvs?.find(x=>x.id===(pdvRulesEditId||currentPdvId()))||currentPdv();if(!p||p.id!=='PDV_001')return;
+  const form=document.querySelector('#app form'),actions=form?.lastElementChild;if(!form)return;
+  const html=`<div class="card"><h3>Modello reale PDV 349 · 7-13 settembre</h3><div class="req"><span>Chiusura-apertura</span><b>da evitare · eccezione evidenziata</b></div><div class="req"><span>Katia</span><b>evitare ancora di piu' chiusura-apertura</b></div><div class="req"><span>Mercoledi giorno basso</span><b>CR + 1 addetto in chiusura</b></div><div class="req"><span>Domenica</span><b>2 addetti · 07:00-13:15</b></div><div class="req"><span>Doppio turno lungo stesso giorno</span><b>non ammesso</b></div><small class="muted">Il modello guida le settimane future, ma nomi e rotazioni restano adattabili a ferie, permessi, competenze e ore disponibili.</small></div>`;actions?.insertAdjacentHTML('beforebegin',html);
 };
 
-try{pdv1SeedReferenceModel();render()}catch(_){}
+(function installReferenceStyles(){
+  if(document.getElementById('referenceModelStyles'))return;const st=document.createElement('style');st.id='referenceModelStyles';st.textContent=`.reference-week-card{border-left:5px solid #2d6d8d;background:#eef7ff}.reference-day-note{margin:8px 0;padding:7px 9px;border-radius:10px;background:#fff8e8;border:1px solid #e0b461;display:grid;gap:3px}.rest-exception-note{display:block;margin-top:5px;padding:4px 7px;border-radius:8px;background:#fff1dd;color:#8a4b00;font-size:.7rem;font-weight:800;line-height:1.25}.external-reference-shift{margin-top:8px;padding:9px;border-radius:10px;background:#eef8f0;color:#21633c;border:1px solid #b9d9c0}.shift .rest-exception-note{grid-column:1/-1}`;document.head.appendChild(st)
+})();
+try{render()}catch(_){}
