@@ -5,17 +5,19 @@ function emailShiftText(s){
   return `${times}${s.skill||s.note?` (${String(s.skill||s.note).replace(/\s+/g,' ')})`:''}`;
 }
 function emailEmployeeDay(day,e){
-  if(day.holiday?.type==='closed')return'FESTIVO';if(leave(e.name,day.date))return'FERIE/PERMESSO';
+  if(day.holiday?.type==='closed')return'FESTIVO';
+  const ext=(typeof PDV1_EXTERNAL_REFERENCE!=='undefined'?PDV1_EXTERNAL_REFERENCE[key(day.date)]||[]:[]).find(x=>typeof refEmp==='function'?refEmp(x.name)===e.name:String(x.name).trim()===String(e.name).trim());
+  if(ext)return`${ext.start}-${ext.end} (${ext.destination} · spostato)`;
+  const abs=typeof absenceItems==='function'?absenceItems(e.name,day.date):[];
+  if(abs.length)return`${abs[0].type||'Permesso'} ${abs[0].hours?hf(Number(abs[0].hours)) :''}`.trim();
+  if(leave(e.name,day.date))return'FERIE/PERMESSO';
   const arr=[];if(day.cr?.name===e.name)arr.push(emailShiftText(day.cr));(day.g||[]).filter(s=>s.name===e.name).forEach(s=>arr.push(emailShiftText(s)));(day.c||[]).filter(s=>s.name===e.name).forEach(s=>arr.push(emailShiftText(s)));
-  const ext=(typeof PDV1_EXTERNAL_REFERENCE!=='undefined'?PDV1_EXTERNAL_REFERENCE[key(day.date)]||[]:[]).find(x=>refEmp(x.name)===e.name);if(ext)arr.push(`${ext.start}-${ext.end} (${ext.destination})`);
   return arr.length?arr.join(' + '):'Riposo';
 }
 function weeklyEmailText(ds){
   const p=typeof currentPdv==='function'?currentPdv():null,name=p?.name||'PDV',code=p?.code?` ${p.code}`:'';
   const lines=[`${name}${code}` ,`Orario ${fmt(ds[0].date)} - ${fmt(ds[6].date)}`,''];
-  S.employees.forEach(e=>{
-    lines.push(e.name);ds.forEach((d,i)=>lines.push(`  ${DAYS[i]} ${fmt(d.date)}: ${emailEmployeeDay(d,e)}`));lines.push('');
-  });
+  S.employees.forEach(e=>{lines.push(e.name);ds.forEach((d,i)=>lines.push(`  ${DAYS[i]} ${fmt(d.date)}: ${emailEmployeeDay(d,e)}`));lines.push('')});
   lines.push('Inviato da Orari Reparto');return lines.join('\n');
 }
 function sendWeeklyTableByEmail(){
