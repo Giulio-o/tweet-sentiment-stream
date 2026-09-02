@@ -23,7 +23,7 @@ leave=function(name,d){return sicknessOnDate(name,d).length>0||leaveBeforeSickne
 const peopleBeforeSickness=people;
 people=function(ds){
   return peopleBeforeSickness(ds).map(p=>{
-    const sickDays=weekSicknessDays(p.name),sickHours=sicknessCreditHours(p),workTarget=Math.max(0,Number(p.workTarget??p.hours||0)-sickHours),worked=Number(p.worked)||0;
+    const sickDays=weekSicknessDays(p.name),sickHours=sicknessCreditHours(p),baseTarget=Number((p.workTarget??p.hours)||0),workTarget=Math.max(0,baseTarget-sickHours),worked=Number(p.worked)||0;
     return{...p,sickDays,sickHours,workTarget,accounted:Number(p.accounted||0)+sickHours,missing:Math.max(0,workTarget-worked),extra:Math.max(0,worked-workTarget)};
   });
 };
@@ -44,6 +44,18 @@ function seedGianmarcoSickness(){
   const id='seed_gianmarco_malattia_20260902_20260920';if(S.sicknessSpans.some(x=>x.id===id))return false;
   const name=S.employees.find(e=>String(e.name||'').trim().toLowerCase()==='gianmarco')?.name||'Gianmarco';
   S.sicknessSpans.push({id,name,from:'2026-09-02',to:'2026-09-20',type:'Malattia',source:'CR'});save();return true;
+}
+
+function applySicknessToSchedule(out){
+  ensureSicknessState();
+  out.forEach(day=>{
+    ['g','c'].forEach(dep=>(day[dep]||[]).forEach(s=>{
+      if(!s?.name||s.name==='SCOPERTO'||!sicknessOnDate(s.name,day.date).length)return;
+      const old=s.name;s.originalSickEmployee=old;s.name='SCOPERTO';s.skill=String(s.skill||'Turno')+` · da coprire per malattia (${old})`;s.sicknessCoverageNeeded=true;
+    }));
+    if(day.cr?.name&&sicknessOnDate(day.cr.name,day.date).length){const old=day.cr.name;day.cr.originalSickEmployee=old;day.cr.name='SCOPERTO';day.cr.note=String(day.cr.note||'CR')+` · da coprire per malattia (${old})`;day.cr.sicknessCoverageNeeded=true}
+  });
+  return out;
 }
 
 // Ore: esigenze di reparto prima, poi recupero ore ordinarie privilegiando lun/ven/sab.
@@ -85,7 +97,7 @@ function applyOrdinaryHoursDistribution(out){
   return out;
 }
 const buildBeforeOrdinaryHoursDistribution=build;
-build=function(){return applyOrdinaryHoursDistribution(buildBeforeOrdinaryHoursDistribution())};
+build=function(){let out=buildBeforeOrdinaryHoursDistribution();out=applySicknessToSchedule(out);return applyOrdinaryHoursDistribution(out)};
 
 function skillCell(e,k){const v=Number(e.skills?.[k]||0);return v?`${v}`:'—'}
 function todayShiftLabel(day,e){
@@ -102,7 +114,7 @@ function todaySkillsGridHtml(ds){
 
 hoursHtml=function(ds){
   const p=people(ds),ot=p.reduce((a,e)=>a+e.extra,0);
-  return`<div class="card"><div class="row wrap"><h3>Ore per addetto</h3><b class="${ot?'bad':'ok'}">Straordinari ${hf(ot)}</b></div><div class="scroll"><table><thead><tr><th>Addetto</th><th>Contr.</th><th>Target</th><th>Lavor.</th><th>Perm.</th><th>Mal.</th><th>Spost.</th><th>Fest.</th><th>Manc.</th><th>Extra</th><th></th></tr></thead><tbody>${p.map(e=>`<tr class="${e.cr?'crrow':''}"><td><b>${esc(e.name)}</b><br><small>${e.cr?'CR':e.dept==='carni'?'Carni':'Gastronomia'}</small></td><td>${hf(e.hours)}</td><td><b>${hf(e.workTarget)}</b></td><td>${hf(e.worked)}</td><td>${e.permits?hf(e.permits):'—'}</td><td>${e.sickDays?`${e.sickDays} gg`: '—'}</td><td>${e.moved?hf(e.moved):'—'}</td><td>${e.festive?hf(e.festive):'—'}</td><td>${e.missing?hf(e.missing):'—'}</td><td class="${e.extra?'bad':''}">${e.extra?hf(e.extra):'—'}</td><td><div class="row wrap" style="gap:5px"><button class="btn small" onclick="quickLeave('${esc(e.name)}')">Ferie</button><button class="btn small" onclick="quickSickness('${esc(e.name)}')">Malattia</button></div></td></tr>`).join('')}</tbody></table></div><small class="muted">Target = ore ordinarie da distribuire dopo ferie/permessi, malattia, spostamenti e festivita. Malattia e permessi restano contabilizzati separatamente.</small></div>`;
+  return`<div class="card"><div class="row wrap"><h3>Ore per addetto</h3><b class="${ot?'bad':'ok'}">Straordinari ${hf(ot)}</b></div><div class="scroll"><table><thead><tr><th>Addetto</th><th>Contr.</th><th>Target</th><th>Lavor.</th><th>Perm.</th><th>Mal.</th><th>Spost.</th><th>Fest.</th><th>Manc.</th><th>Extra</th><th></th></tr></thead><tbody>${p.map(e=>`<tr class="${e.cr?'crrow':''}"><td><b>${esc(e.name)}</b><br><small>${e.cr?'CR':e.dept==='carni'?'Carni':'Gastronomia'}</small></td><td>${hf(e.hours)}</td><td><b>${hf(e.workTarget)}</b></td><td>${hf(e.worked)}</td><td>${e.permits?hf(e.permits):'—'}</td><td>${e.sickDays?`${e.sickDays} gg`:'—'}</td><td>${e.moved?hf(e.moved):'—'}</td><td>${e.festive?hf(e.festive):'—'}</td><td>${e.missing?hf(e.missing):'—'}</td><td class="${e.extra?'bad':''}">${e.extra?hf(e.extra):'—'}</td><td><div class="row wrap" style="gap:5px"><button class="btn small" onclick="quickLeave('${esc(e.name)}')">Ferie</button><button class="btn small" onclick="quickSickness('${esc(e.name)}')">Malattia</button></div></td></tr>`).join('')}</tbody></table></div><small class="muted">Target = ore ordinarie da distribuire dopo ferie/permessi, malattia, spostamenti e festivita. Malattia e permessi restano contabilizzati separatamente.</small></div>`;
 };
 
 const leavePageBeforeSickness=leavePage;
