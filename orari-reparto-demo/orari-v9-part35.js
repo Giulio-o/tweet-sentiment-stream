@@ -1,8 +1,9 @@
 // Esigenze operative comunicate per la settimana 14-20 settembre 2026:
 // - Massimo libero nel pomeriggio di martedi 15;
 // - inventario trimestrale mercoledi 16 con tre presenze 18:00-20:45.
+// - Katia giovedi 17 senza chiusura e venerdi 18 al pesce 07:00-14:00;
 // - Katia sabato 19 al mattino, mai di nuovo in chiusura dopo sabato 12.
-const PDV1_SEPTEMBER_OPERATIONAL_VERSION='pdv1-ops-20260915-v2';
+const PDV1_SEPTEMBER_OPERATIONAL_VERSION='pdv1-ops-20260915-v3';
 const PDV1_INVENTORY_EVENT={
   id:'inventory_quarterly_20260916',date:'2026-09-16',label:'Inventario trimestrale',
   start:'18:00',end:'20:45',requiredPeople:3,crCounts:true
@@ -105,6 +106,41 @@ function september19Assign(day,slot,employeeName,label){
   slot.name=employee.name;if(other)other.name=current;
   slot.september19Fixed=true;inventoryAppendText(slot,label);return true;
 }
+function applyPdv1September17And18Plan(out){
+  if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
+  const thursday=out.find(d=>key(d.date)==='2026-09-17');
+  if(thursday&&thursday.holiday?.type!=='closed'){
+    const shortClose=(thursday.g||[]).find(s=>s.start==='17:00'&&s.end===String(S.rules?.closingTime||'20:45'));
+    const massimo=september19Employee('Massimo');
+    if(shortClose&&september19Available(massimo,thursday,shortClose)){
+      shortClose.name=massimo.name;shortClose.septemberOperationalFixed=true;
+      inventoryAppendText(shortClose,'riassetto chiusura · riposo Katia prima del pesce venerdì');
+      thursday.september17Plan={katiaRest:true,massimoShortClose:true};
+    }else{
+      thursday.september17Plan={katiaRest:false,massimoShortClose:false,warning:'Assetto giovedi da verificare'};
+    }
+  }
+  const friday=out.find(d=>key(d.date)==='2026-09-18');
+  if(friday&&friday.holiday?.type!=='closed'){
+    const forno=(friday.g||[]).find(s=>/forno/i.test(String(s.skill||''))&&s.start==='06:00');
+    const fullClose=(friday.g||[]).find(s=>s.start==='13:30'&&s.end===String(S.rules?.closingTime||'20:45'));
+    const fish=(friday.c||[]).find(s=>/pesce/i.test(String(s.skill||'')));
+    const marine=september19Employee('Marine'),miriam=september19Employee('Miriam'),katia=september19Employee('Katia');
+    const fishProbe={...(fish||{}),start:'07:00',end:'14:00',pause:15};
+    if(forno&&fullClose&&fish&&september19Available(marine,friday,forno)&&september19Available(miriam,friday,fullClose)&&september19Available(katia,friday,fishProbe)){
+      forno.name=marine.name;fullClose.name=miriam.name;
+      fish.name=katia.name;fish.start='07:00';fish.end='14:00';fish.pause=15;
+      [forno,fullClose,fish].forEach(s=>s.septemberOperationalFixed=true);
+      inventoryAppendText(forno,'riassetto per Katia al pesce');
+      inventoryAppendText(fullClose,'riassetto per Katia al pesce');
+      inventoryAppendText(fish,'Katia al pesce · assetto richiesto 07:00-14:00');
+      friday.september18Plan={katiaFish:true,fishStart:'07:00',fishEnd:'14:00',forno:'Marine',closer:'Miriam'};
+    }else{
+      friday.september18Plan={katiaFish:false,warning:'Assetto pesce venerdi da verificare'};
+    }
+  }
+  return out;
+}
 function applyPdv1September19KatiaMorning(out){
   if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
   const day=out.find(d=>key(d.date)==='2026-09-19');if(!day||day.holiday?.type==='closed')return out;
@@ -135,7 +171,7 @@ function applyPdv1September19KatiaMorning(out){
 const editedBeforeInventoryCoverage=edited;
 edited=function(ds){
   if(ensurePdv1SeptemberOperationalNeeds())save();
-  return applyPdv1September19KatiaMorning(applyInventoryCoverage(editedBeforeInventoryCoverage(ds)));
+  return applyPdv1September19KatiaMorning(applyPdv1September17And18Plan(applyInventoryCoverage(editedBeforeInventoryCoverage(ds))));
 };
 
 const shiftRowBeforeInventoryCoverage=shiftRow;
