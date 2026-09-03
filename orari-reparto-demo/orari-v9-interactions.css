@@ -66,3 +66,19 @@ nav button:active{transform:scale(.96)}
 .base-grid-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px;font-size:.68rem;color:#52616d}.base-grid-legend span{display:flex;align-items:center;gap:4px}.base-grid-legend i{width:11px;height:11px;border-radius:3px;background:#b3261e}.base-grid-legend i.borderline{background:#d18a00}.base-grid-legend i.skill{background:#8b1a13}
 .shift.base-grid-critical,.card.cr.base-grid-critical{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#fff0ee;border-left:4px solid #b3261e}.shift.base-grid-borderline,.card.cr.base-grid-borderline{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#fff8e8;border-left:4px solid #d18a00}.shift.base-grid-skill-problem,.card.cr.base-grid-skill-problem{background:#fdecea;border-left:4px solid #8b1a13}.base-grid-warning{display:block;margin-top:5px;padding:4px 7px;border-radius:8px;font-size:.68rem;font-weight:900;line-height:1.25}.base-grid-warning.critical,.base-grid-warning.skill{background:#f8d8d4;color:#8b1a13}.base-grid-warning.borderline{background:#ffe9b8;color:#754800}.base-grid-day-warning{box-shadow:0 5px 18px #b3261e18}
 @media(max-width:600px){.base-grid-summary{grid-template-columns:1fr 1fr}.base-grid-issue{grid-template-columns:1fr}.base-grid-issue strong{text-align:left}.base-grid-button{display:block;width:100%;margin:7px 0 0}.base-grid-priority{align-items:stretch}.base-grid-priority b{width:100%}}
+
+/* Alternanza delle chiusure del sabato */
+.shift.saturday-rotation-ok{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#f0faf5;border-left:4px solid #14734b}
+.shift.saturday-rotation-warning{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#fff3d6;border-left:4px solid #d18a00}
+.saturday-rotation-note{display:block;margin-top:5px;padding:4px 7px;border-radius:8px;background:#dff3e8;color:#12633f;font-size:.68rem;font-weight:900;line-height:1.25}
+.saturday-rotation-warning .saturday-rotation-note{background:#ffe9b8;color:#754800;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px}
+.base-grid-cell-alert.saturday-ok{background:#14734b}
+
+/* Richiesta Massimo e presidio inventario trimestrale */
+.shift.inventory-shift-ok{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#eef7ff;border-left:4px solid #175c87}
+.shift.inventory-shift-warning{margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;background:#fff0ee;border-left:4px solid #b3261e}
+.inventory-shift-note{display:block;margin-top:5px;padding:4px 7px;border-radius:8px;background:#dceefa;color:#175c87;font-size:.68rem;font-weight:900;line-height:1.25}
+.inventory-shift-warning .inventory-shift-note{background:#f8d8d4;color:#8b1a13;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px}
+.inventory-day-banner{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0;padding:9px 11px;border-radius:11px;background:#eef7ff;border:1px solid #9bc4df;color:#175c87;font-size:.75rem}
+.inventory-day-banner.warning{background:#fff0ee;border-color:#efb4af;color:#8b1a13}.inventory-day-banner span{font-weight:800}
+@media(max-width:460px){.inventory-day-banner{align-items:flex-start;flex-direction:column}}
