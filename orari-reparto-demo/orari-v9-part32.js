@@ -111,7 +111,7 @@ function absencePlannerCandidates(ds,item){
   }).map(e=>{
     const person=stats.find(x=>x.name===e.name),other=absencePlannerOtherShifts(day,e.name,target),already=target?.name===e.name,addedHours=already?0:Math.max(0,needed-(Number(item.pause)||0))/60,projected=(Number(person?.worked)||0)+addedHours,workTarget=Number(person?.workTarget??person?.hours)||0,extra=Math.max(0,projected-workTarget),missing=Math.max(0,Number(person?.missing)||0),rest=absencePlannerRest(ds,index,e.name,item),sameDept=e.cr||e.dept===(item.dep==='c'?'carni':'gastronomia'),level=Number(e.skills?.[required]||0);
     const score=(extra*45)+(rest.ok?0:180)+(sameDept?0:22)+(missing>0?-Math.min(missing,addedHours)*8:15)-(level*7)+(already?-4:0);
-    return{employee:e,person,required,level,extra,missing,addedHours,rest,sameDept,already,score};
+    return{employee:e,person,required,level,extra,missing,addedHours,rest,sameDept,already,score,beforeShifts:other.slice(),wasFree:other.length===0};
   }).sort((a,b)=>a.score-b.score||b.level-a.level||a.employee.name.localeCompare(b.employee.name)).slice(0,3);
 }
 function absencePlannerChoice(slotKey){ensureAbsencePlannerState();return S.absenceCoverageChoices.find(x=>x.slotKey===slotKey)||null}
@@ -138,9 +138,21 @@ function absencePlannerCandidateReason(option){
   parts.push(option.rest.ok?'riposo rispettato':`riposo ${hf(option.rest.min/60)} · eccezione`);
   return parts.join(' · ');
 }
+function absencePlannerShiftText(shift){
+  if(!shift?.start||!shift?.end)return'';
+  return`${shift.start}–${shift.end}${shift.start2&&shift.end2?` / ${shift.start2}–${shift.end2}`:''}`;
+}
+function absencePlannerScheduleText(shifts){
+  const labels=(shifts||[]).filter(s=>s?.start&&s?.end).slice().sort((a,b)=>mins(a.start)-mins(b.start)).map(absencePlannerShiftText);
+  return labels.length?labels.join(' + '):'LIBERO';
+}
+function absencePlannerCandidateChangeHtml(item,option,isApplied){
+  const before=absencePlannerScheduleText(option.beforeShifts),after=absencePlannerScheduleText([...(option.beforeShifts||[]),item]);
+  return`<div class="absence-change"><div><small>ORARIO PRIMA</small><b class="${option.wasFree?'free':''}">${esc(before)}</b></div><span class="absence-change-arrow" aria-hidden="true">→</span><div><small>ORARIO DOPO</small><b>${esc(after)}</b></div></div><div class="absence-flags">${option.wasFree?'<span class="absence-flag free">LIBERO PRIMA</span><span class="absence-flag added">TURNO AGGIUNTO</span>':'<span class="absence-flag changed">ORARIO CAMBIATO</span>'}<span class="absence-flag contact">${isApplied?'DA CONTATTARE':'DA CONTATTARE SE SCELTO'}</span></div>`;
+}
 function absencePlannerCandidateHtml(item,option,index){
-  const selected=absencePlannerChoice(item.slotKey)?.candidate===option.employee.name,already=option.already&&!selected;
-  return`<div class="absence-option ${index===0?'recommended':''} ${selected?'selected':''}"><div><b>${esc(option.employee.name)}</b>${index===0?'<span class="absence-best">CONSIGLIATA</span>':''}<br><small>${esc(absencePlannerCandidateReason(option))}</small></div><button class="btn small ${selected?'primary':''}" data-slot-key="${esc(item.slotKey)}" data-candidate="${esc(option.employee.name)}" onclick="applyAbsenceCandidateFromButton(this)" ${already?'disabled':''}>${selected?'Scelta applicata':already?'Gia nell’orario':'Usa questa'}</button></div>`;
+  const selected=absencePlannerChoice(item.slotKey)?.candidate===option.employee.name,already=option.already&&!selected,isApplied=selected||already;
+  return`<div class="absence-option ${index===0?'recommended':''} ${selected?'selected':''}"><div class="absence-option-main"><div><b>${esc(option.employee.name)}</b>${index===0?'<span class="absence-best">CONSIGLIATA</span>':''}<br><small>${esc(absencePlannerCandidateReason(option))}</small></div>${absencePlannerCandidateChangeHtml(item,option,isApplied)}</div><button class="btn small ${selected?'primary':''}" data-slot-key="${esc(item.slotKey)}" data-candidate="${esc(option.employee.name)}" onclick="applyAbsenceCandidateFromButton(this)" ${already?'disabled':''}>${selected?'Scelta applicata':already?'Già nell’orario':'Usa questa'}</button></div>`;
 }
 function absencePlannerItemHtml(ds,item){
   const date=new Date(item.date+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'}),options=absencePlannerCandidates(ds,item),choice=absencePlannerChoice(item.slotKey),status=item.covered?`Coperto da ${item.currentName}`:'SCOPERTO';
@@ -149,7 +161,7 @@ function absencePlannerItemHtml(ds,item){
 function absencePlannerPanelHtml(ds,affected){
   const records=absencePlannerRecords(),uncovered=affected.filter(x=>!x.covered).length,actionable=affected.filter(x=>!x.covered&&absencePlannerCandidates(ds,x).length).length;
   const action=uncovered?(actionable?`<button class="btn primary absence-apply-all" onclick="applyAllRecommendedAbsenceCovers()">Applica ${actionable===1?'la soluzione consigliata':`le ${actionable} soluzioni consigliate`}</button>`:'<div class="absence-no-option"><b>Nessuna scopertura ha una soluzione interna automatica.</b><br><small>Le alternative esterne sono indicate sotto ciascun turno.</small></div>'):'<div class="absence-all-covered">✓ Tutti i turni coinvolti hanno gia una copertura</div>';
-  return`<div class="card absence-planner" id="absencePlanner"><div class="row wrap"><div><h2>Rigenera orario per assenze</h2><small class="muted">Confronta le soluzioni prima di cambiare i turni.</small></div><button class="btn small" onclick="closeAbsencePlanner()">Chiudi</button></div><div class="absence-summary"><div><b>${records.length}</b><small>giorni di assenza</small></div><div><b>${affected.length}</b><small>turni coinvolti</small></div><div class="${uncovered?'bad':'ok'}"><b>${uncovered}</b><small>ancora scoperti</small></div></div>${!records.length?'<div class="absence-empty"><b>Nessuna malattia, ferie o permesso nella settimana.</b><br><small>Inserisci l’assenza dalla tabella ore o dalla sezione Ferie.</small></div>':!affected.length?'<div class="absence-empty"><b>Le assenze non tolgono turni programmati.</b><br><small>Non serve modificare l’orario di questa settimana.</small></div>':`${action}${affected.map(x=>absencePlannerItemHtml(ds,x)).join('')}`}</div>`;
+  return`<div class="card absence-planner" id="absencePlanner"><div class="row wrap"><div><h2>Rigenera orario per assenze</h2><small class="muted">Confronta l’orario prima e dopo. Ogni sostituto scelto deve essere contattato e confermare.</small></div><button class="btn small" onclick="closeAbsencePlanner()">Chiudi</button></div><div class="absence-summary"><div><b>${records.length}</b><small>giorni di assenza</small></div><div><b>${affected.length}</b><small>turni coinvolti</small></div><div class="${uncovered?'bad':'ok'}"><b>${uncovered}</b><small>ancora scoperti</small></div></div>${!records.length?'<div class="absence-empty"><b>Nessuna malattia, ferie o permesso nella settimana.</b><br><small>Inserisci l’assenza dalla tabella ore o dalla sezione Ferie.</small></div>':!affected.length?'<div class="absence-empty"><b>Le assenze non tolgono turni programmati.</b><br><small>Non serve modificare l’orario di questa settimana.</small></div>':`${action}${affected.map(x=>absencePlannerItemHtml(ds,x)).join('')}`}</div>`;
 }
 function installAbsencePlanner(){
   if(view!=='schedule')return;ensureAbsencePlannerState();const app=document.getElementById('app'),hero=app?.querySelector('.purplebox');if(!app||!hero)return;
@@ -161,12 +173,12 @@ function openAbsencePlanner(){absencePlannerOpen=true;schedule()}
 function closeAbsencePlanner(){absencePlannerOpen=false;schedule()}
 function applyAbsenceCandidateFromButton(btn){
   const slotKey=btn.dataset.slotKey,candidate=btn.dataset.candidate,ds=edited(build()),item=absencePlannerAffected(ds).find(x=>x.slotKey===slotKey),option=item&&absencePlannerCandidates(ds,item).find(x=>x.employee.name===candidate);if(!item||!option){alert('Questa soluzione non e piu disponibile. Rigenera le opzioni.');schedule();return}
-  ensureAbsencePlannerState();S.absenceCoverageChoices=S.absenceCoverageChoices.filter(x=>x.slotKey!==slotKey);S.absenceCoverageChoices.push({slotKey,date:item.date,dep:item.dep,index:item.index,start:item.start,end:item.end,start2:item.start2,end2:item.end2,candidate,absent:item.absent,absenceType:item.absenceType,createdAt:new Date().toISOString()});save();absencePlannerOpen=true;schedule();
+  ensureAbsencePlannerState();S.absenceCoverageChoices=S.absenceCoverageChoices.filter(x=>x.slotKey!==slotKey);S.absenceCoverageChoices.push({slotKey,date:item.date,dep:item.dep,index:item.index,start:item.start,end:item.end,start2:item.start2,end2:item.end2,candidate,absent:item.absent,absenceType:item.absenceType,contactRequired:true,createdAt:new Date().toISOString()});save();absencePlannerOpen=true;schedule();
 }
 function removeAbsenceCoverageFromButton(btn){ensureAbsencePlannerState();S.absenceCoverageChoices=S.absenceCoverageChoices.filter(x=>x.slotKey!==btn.dataset.slotKey);save();absencePlannerOpen=true;schedule()}
 function applyAllRecommendedAbsenceCovers(){
-  if(!confirm('Applicare la prima soluzione compatibile a tutti i turni ancora scoperti?'))return;ensureAbsencePlannerState();let changed=false,keys=absencePlannerAffected(edited(build())).filter(x=>!x.covered).map(x=>x.slotKey);
-  keys.forEach(slotKey=>{const ds=edited(build()),item=absencePlannerAffected(ds).find(x=>x.slotKey===slotKey);if(!item||item.covered)return;const option=absencePlannerCandidates(ds,item)[0];if(!option)return;S.absenceCoverageChoices=S.absenceCoverageChoices.filter(x=>x.slotKey!==slotKey);S.absenceCoverageChoices.push({slotKey,date:item.date,dep:item.dep,index:item.index,start:item.start,end:item.end,start2:item.start2,end2:item.end2,candidate:option.employee.name,absent:item.absent,absenceType:item.absenceType,createdAt:new Date().toISOString()});changed=true});
+  if(!confirm('Applicare la prima soluzione compatibile a tutti i turni ancora scoperti? Le persone scelte dovranno essere contattate e confermare.'))return;ensureAbsencePlannerState();let changed=false,keys=absencePlannerAffected(edited(build())).filter(x=>!x.covered).map(x=>x.slotKey);
+  keys.forEach(slotKey=>{const ds=edited(build()),item=absencePlannerAffected(ds).find(x=>x.slotKey===slotKey);if(!item||item.covered)return;const option=absencePlannerCandidates(ds,item)[0];if(!option)return;S.absenceCoverageChoices=S.absenceCoverageChoices.filter(x=>x.slotKey!==slotKey);S.absenceCoverageChoices.push({slotKey,date:item.date,dep:item.dep,index:item.index,start:item.start,end:item.end,start2:item.start2,end2:item.end2,candidate:option.employee.name,absent:item.absent,absenceType:item.absenceType,contactRequired:true,createdAt:new Date().toISOString()});changed=true});
   if(changed)save();absencePlannerOpen=true;schedule();
 }
 
