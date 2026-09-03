@@ -52,6 +52,7 @@ https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
 - Ferie, Permessi, Malattia e Spostamenti.
 - Griglia odierna: competenze, ore residue e turno di oggi.
 - Contatori malattia.
+- Pulsante `Rigenera per assenze`: ricostruisce i turni coinvolti da ferie, malattia e permessi certi, propone fino a 3 sostituti compatibili e permette di applicare la singola scelta o tutte le soluzioni consigliate.
 - Esporta tabella settimanale.
 - Bottone `Manda tabella per mail` con destinatario già configurato nell'app.
 - Hover/pressione visiva sui pulsanti.
@@ -75,6 +76,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part29.js`: invio tabella per email.
 - `orari-v9-part30.js`: limite multi-turno giornaliero.
 - `orari-v9-part31.js`: malattia, contatori, griglia odierna e distribuzione ore lun/ven/sab.
+- `orari-v9-part32.js`: pianificatore coperture per assenze con confronto candidati, controllo competenze/riposo/ore e applicazione reversibile.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.

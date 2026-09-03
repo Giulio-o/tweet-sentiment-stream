@@ -136,7 +136,7 @@ employeeWeekPage=function(name){
   employeeWeekBeforeReferenceDecor(name);if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
   const emp=S.employees.find(e=>e.name===employeeWeekName);if(!emp)return;const ds=edited(build());
   [...document.querySelectorAll('#app .employee-day')].forEach((card,i)=>{
-    const day=ds[i];if(!day)return,shifts=employeeDayShifts(day,emp.name),warn=shifts.filter(s=>s.restException).map(restExceptionText);
+    const day=ds[i];if(!day)return;const shifts=employeeDayShifts(day,emp.name),warn=shifts.filter(s=>s.restException).map(restExceptionText);
     if(day.cr?.name===emp.name&&day.cr.restException)warn.push(restExceptionText(day.cr));
     const ext=(PDV1_EXTERNAL_REFERENCE[key(day.date)]||[]).find(x=>refEmp(x.name)===emp.name);
     if(ext&&!card.querySelector('.external-reference-shift'))card.insertAdjacentHTML('beforeend',`<div class="external-reference-shift"><b>${esc(ext.destination)}</b> · ${esc(ext.start)}-${esc(ext.end)}<br><small>Turno fuori reparto · settimana modello</small></div>`);
