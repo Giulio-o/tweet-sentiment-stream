@@ -40,6 +40,10 @@ nav button:active{transform:scale(.96)}
 .absence-option{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid var(--bd);border-radius:11px;margin-top:6px}
 .absence-option.recommended{background:#eef7ff;border-color:#9bc4df}.absence-option.selected{background:#f0faf5;border-color:#9bd2b8}
 .absence-option small{color:#667784;line-height:1.3}.absence-best{display:inline-block;margin-left:6px;padding:2px 5px;border-radius:999px;background:#d8ecf8;color:#175c87;font-size:.58rem;vertical-align:2px}
+.absence-option-main{min-width:0}
+.absence-change{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:7px;margin-top:7px;padding:7px;border-radius:9px;background:#f7f9fa;border:1px solid #dce4e8}
+.absence-change>div{min-width:0;display:grid;gap:2px}.absence-change small{font-size:.75rem;font-weight:850;letter-spacing:.03em}.absence-change b{font-size:.8rem;line-height:1.3;overflow-wrap:anywhere}.absence-change b.free{color:#52616d}.absence-change-arrow{font-weight:900;color:#175c87}
+.absence-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.absence-flag{display:inline-block;padding:3px 6px;border-radius:999px;font-size:.75rem;font-weight:900;letter-spacing:.02em}.absence-flag.free{background:#e8edf0;color:#45535e}.absence-flag.added{background:#fff1d6;color:#8a5700}.absence-flag.changed{background:#e7f1f8;color:#175c87}.absence-flag.contact{background:#fde3df;color:#9b241d}
 .absence-no-option{padding:10px;border-radius:11px;background:#fff1ef;color:#8f211b}
 .absence-undo{margin-top:9px}
-@media(max-width:460px){.absence-planner-button{display:block;width:100%;margin:7px 0 0}.absence-option{grid-template-columns:1fr}.absence-option .btn{width:100%}.absence-summary small{font-size:.6rem}}
+@media(max-width:460px){.absence-planner-button{display:block;width:100%;margin:7px 0 0}.absence-option{grid-template-columns:1fr}.absence-option .btn{width:100%}.absence-summary small{font-size:.6rem}.absence-change{grid-template-columns:1fr}.absence-change-arrow{transform:rotate(90deg);justify-self:center}}
