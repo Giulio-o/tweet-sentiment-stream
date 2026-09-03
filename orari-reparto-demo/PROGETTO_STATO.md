@@ -1,6 +1,6 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-02
+Ultimo aggiornamento: 2026-09-03
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
@@ -53,6 +53,8 @@ https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
 - Griglia odierna: competenze, ore residue e turno di oggi.
 - Contatori malattia.
 - Pulsante `Rigenera per assenze`: ricostruisce i turni coinvolti da ferie, malattia e permessi certi, propone fino a 3 sostituti compatibili e permette di applicare la singola scelta o tutte le soluzioni consigliate.
+- Griglia base settimanale: addetti sulle righe e giorni sulle colonne; segue la settimana selezionata e mostra la rotazione ciclica senza cambiare le priorità operative.
+- Controllo chiusura→apertura su entrambe le giornate: rosso se il riposo è sotto le 12 ore, ambra se è tra 12 e 13 ore; sono inoltre evidenziati turni scoperti e competenze insufficienti.
 - Esporta tabella settimanale.
 - Bottone `Manda tabella per mail` con destinatario già configurato nell'app.
 - Hover/pressione visiva sui pulsanti.
@@ -77,6 +79,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part30.js`: limite multi-turno giornaliero.
 - `orari-v9-part31.js`: malattia, contatori, griglia odierna e distribuzione ore lun/ven/sab.
 - `orari-v9-part32.js`: pianificatore coperture per assenze con confronto candidati, controllo competenze/riposo/ore e applicazione reversibile.
+- `orari-v9-part33.js`: griglia base ciclica, audit fabbisogni/competenze e segnalazione dei passaggi chiusura-apertura critici o borderline.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.
