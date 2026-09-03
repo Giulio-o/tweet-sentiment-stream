@@ -1,7 +1,8 @@
 // Esigenze operative comunicate per la settimana 14-20 settembre 2026:
 // - Massimo libero nel pomeriggio di martedi 15;
 // - inventario trimestrale mercoledi 16 con tre presenze 18:00-20:45.
-const PDV1_SEPTEMBER_OPERATIONAL_VERSION='pdv1-ops-20260915-v1';
+// - Katia sabato 19 al mattino, mai di nuovo in chiusura dopo sabato 12.
+const PDV1_SEPTEMBER_OPERATIONAL_VERSION='pdv1-ops-20260915-v2';
 const PDV1_INVENTORY_EVENT={
   id:'inventory_quarterly_20260916',date:'2026-09-16',label:'Inventario trimestrale',
   start:'18:00',end:'20:45',requiredPeople:3,crCounts:true
@@ -90,10 +91,51 @@ function applyInventoryCoverage(out){
   return out;
 }
 
+function september19Employee(name){
+  const target=String(name||'').trim().toLowerCase();return S.employees.find(e=>String(e.name||'').trim().toLowerCase()===target)||null;
+}
+function september19Available(employee,day,shift){
+  if(!employee||leave(employee.name,day.date))return false;
+  if(typeof blockedAt==='function'&&blockedAt(employee.name,day.date,shift.start,shift.end))return false;
+  return true;
+}
+function september19Assign(day,slot,employeeName,label){
+  const employee=september19Employee(employeeName);if(!slot||!september19Available(employee,day,slot))return false;
+  const current=String(slot.name||''),other=(day.g||[]).find(s=>s!==slot&&s.name===employee.name);
+  slot.name=employee.name;if(other)other.name=current;
+  slot.september19Fixed=true;inventoryAppendText(slot,label);return true;
+}
+function applyPdv1September19KatiaMorning(out){
+  if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
+  const day=out.find(d=>key(d.date)==='2026-09-19');if(!day||day.holiday?.type==='closed')return out;
+  const close=String(S.rules?.closingTime||'20:45'),closers=(day.g||[]).filter(s=>String(s.end||'')===close).sort((a,b)=>mins(a.start)-mins(b.start));
+  const desiredClosers=['Antonio','Miriam'];
+  closers.slice(0,2).forEach((slot,index)=>{
+    const old=slot.name,desired=desiredClosers[index];
+    if(september19Assign(day,slot,desired,'chiusura alternata sabato 19')){
+      delete slot.saturdayRotationWarning;
+      if(String(old||'').trim()!==String(slot.name||'').trim())slot.saturdayRotation={oldName:old,newName:slot.name,previousDate:'2026-09-12',mode:'assetto richiesto'};
+    }
+  });
+  const katiaMorning=(day.g||[]).find(s=>s.start==='09:30'&&mins(s.end)<=14*60+30);
+  if(september19Assign(day,katiaMorning,'Katia','Katia mattina · assetto richiesto sabato 19')){
+    katiaMorning.saturdayRotationMoved={name:katiaMorning.name,from:'chiusura',previousDate:'2026-09-12'};
+  }else if(katiaMorning){
+    katiaMorning.september19Warning=true;inventoryAppendText(katiaMorning,'ATTENZIONE: Katia mattina da verificare');
+  }
+  const afternoonSupport=(day.g||[]).find(s=>s.start==='13:00'&&s.end==='17:30');
+  september19Assign(day,afternoonSupport,'Maia','riassetto sabato 19 dopo Katia al mattino');
+  day.september19Plan={katiaMorning:Boolean(katiaMorning&&String(katiaMorning.name||'').trim()==='Katia'),closers:closers.slice(0,2).map(s=>String(s.name||'').trim())};
+  if(typeof baseGridAuditWeek==='function'){
+    const audit=baseGridAuditWeek(out);audit.saturdayRotationWarnings=[];
+  }
+  return out;
+}
+
 const editedBeforeInventoryCoverage=edited;
 edited=function(ds){
   if(ensurePdv1SeptemberOperationalNeeds())save();
-  return applyInventoryCoverage(editedBeforeInventoryCoverage(ds));
+  return applyPdv1September19KatiaMorning(applyInventoryCoverage(editedBeforeInventoryCoverage(ds)));
 };
 
 const shiftRowBeforeInventoryCoverage=shiftRow;

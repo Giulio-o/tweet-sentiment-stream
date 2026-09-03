@@ -81,7 +81,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part32.js`: pianificatore coperture per assenze con confronto candidati, controllo competenze/riposo/ore e applicazione reversibile.
 - `orari-v9-part33.js`: griglia base ciclica, audit fabbisogni/competenze e segnalazione dei passaggi chiusura-apertura critici o borderline.
 - `orari-v9-part34.js`: alternanza intersettimanale delle chiusure del sabato; chi ha chiuso il sabato precedente viene sostituito o scambiato solo con personale competente e con riposi validi. Le eccezioni inevitabili restano evidenziate come borderline.
-- `orari-v9-part35.js`: indisponibilità di Massimo nel pomeriggio del 15/09/2026 e presidio dell’inventario trimestrale del 16/09, con terza presenza 18:00-20:45 oppure copertura equivalente del CR.
+- `orari-v9-part35.js`: indisponibilità di Massimo nel pomeriggio del 15/09/2026, presidio dell’inventario trimestrale del 16/09 e assetto esplicito del sabato 19 con Katia 09:30-14:30, Antonio/Miriam in chiusura e Maia 13:00-17:30.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.
