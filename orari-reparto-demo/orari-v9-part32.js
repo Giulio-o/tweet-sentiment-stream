@@ -110,7 +110,9 @@ function absencePlannerCandidates(ds,item){
     return scheduled+needed<=cap;
   }).map(e=>{
     const person=stats.find(x=>x.name===e.name),other=absencePlannerOtherShifts(day,e.name,target),already=target?.name===e.name,addedHours=already?0:Math.max(0,needed-(Number(item.pause)||0))/60,projected=(Number(person?.worked)||0)+addedHours,workTarget=Number(person?.workTarget??person?.hours)||0,extra=Math.max(0,projected-workTarget),missing=Math.max(0,Number(person?.missing)||0),rest=absencePlannerRest(ds,index,e.name,item),sameDept=e.cr||e.dept===(item.dep==='c'?'carni':'gastronomia'),level=Number(e.skills?.[required]||0);
-    const score=(extra*45)+(rest.ok?0:180)+(sameDept?0:22)+(missing>0?-Math.min(missing,addedHours)*8:15)-(level*7)+(already?-4:0);
+    // Dopo l'idoneita minima, preserviamo nell'ordine riposo, reparto e livello
+    // di competenza. Il monte ore decide soltanto tra alternative operative simili.
+    const score=(rest.ok?0:600)+(sameDept?0:120)+((3-level)*45)+(extra*2)+(missing>0?-Math.min(missing,addedHours)*2:4)+(already?-4:0);
     return{employee:e,person,required,level,extra,missing,addedHours,rest,sameDept,already,score,beforeShifts:other.slice(),wasFree:other.length===0};
   }).sort((a,b)=>a.score-b.score||b.level-a.level||a.employee.name.localeCompare(b.employee.name)).slice(0,3);
 }

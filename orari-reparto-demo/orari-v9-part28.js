@@ -1,42 +1,36 @@
-// PDV 1 / 349 - settimana reale 07-13/09/2026 usata come modello di pianificazione.
-const PDV1_REFERENCE_WEEK={from:'2026-09-07',to:'2026-09-13',version:'pdv1-ref-20260907-v2'};
+// PDV 1 / 349 - settimana pubblicata 07-13/09/2026, aggiornata dal PDF Drive del 04/09/2026.
+const PDV1_REFERENCE_WEEK={from:'2026-09-07',to:'2026-09-13',version:'pdv1-ref-20260907-v3',publishedAt:'2026-09-04 07:00'};
 
 function refEmp(label){
   const t=String(label||'').trim().toLowerCase();
   if(t==='giulio')return S.employees.find(e=>e.cr)?.name||'Giulio CR';
   return S.employees.find(e=>String(e.name||'').trim().toLowerCase()===t)?.name||label;
 }
-function refPause(start,end,start2='',end2=''){
-  const total=Math.max(0,mins(end)-mins(start))+(start2&&end2?Math.max(0,mins(end2)-mins(start2)):0);
-  return total>6*60?15:0;
-}
 function refShift(name,start,end,skill,extra={}){
-  const s={name:refEmp(name),start,end,skill,pause:refPause(start,end,extra.start2||'',extra.end2||''),referenceModel:true,source:'Modello reale 7-13 settembre',...extra};
-  if(s.start2&&s.end2)s.pause=refPause(start,end,s.start2,s.end2);
-  return s;
+  return{name:refEmp(name),start,end,skill,pause:0,referenceModel:true,source:'Drive · orario pubblicato 7-13 settembre',...extra};
 }
 function refDay(g=[],c=[],cr=null,note=''){return{g,c,cr,note}}
 
 // Trascrizione dell'orario pubblicato caricato su Drive.
 const PDV1_REAL_ROSTER={
   '2026-09-07':refDay([
-    ['Katia','06:30','13:30','Gastro mattina'],['Stefano','07:15','14:00','Gastro mattina'],['Massimo','14:00','20:45','Chiusura'],['Antonio','15:15','20:45','Chiusura'],['Marine','06:00','13:00','Gastro mattina']
-  ],[['Gabriele','06:30','13:30','Carni']],['Giulio','08:00','14:00','CR'],'Miriam: permesso sindacale · Maia: Generi Vari'),
+    ['Marine','06:00','13:00','Forno'],['Katia','06:30','13:30','Ordini · Gastro mattina'],['Stefano','07:15','14:00','Servizio mattina'],['Massimo','14:00','20:45','Chiusura'],['Antonio','14:30','20:45','Chiusura']
+  ],[['Gabriele','06:30','13:30','Macelleria']],['Giulio','07:00','13:00','CR mattina'],'Gianmarco assente · Miriam assente · Maia a Generi Vari'),
   '2026-09-08':refDay([
-    ['Gianmarco','13:30','20:45','Chiusura Gastro'],['Katia','13:30','20:45','Chiusura'],['Stefano','06:30','13:30','Gastro mattina'],['Miriam','06:00','13:00','Gastro mattina']
-  ],[['Gabriele','07:00','13:00','Carni']],['Giulio','06:00','11:00','CR',{start2:'13:00',end2:'15:30'}],'Marine: permesso 104'),
+    ['Stefano','06:00','13:00','Forno'],['Massimo','06:30','13:30','Servizio mattina'],['Katia','13:30','20:45','Chiusura'],['Antonio','14:30','20:45','Chiusura']
+  ],[['Gabriele','07:00','13:00','Macelleria']],['Giulio','06:00','11:30','CR mattina'],'Gianmarco assente · Marine assente'),
   '2026-09-09':refDay([
-    ['Katia','07:00','14:00','Gastro mattina'],['Stefano','06:30','13:30','Gastro mattina'],['Antonio','06:00','13:00','Gastro mattina'],['Marine','17:00','20:45','Chiusura leggera']
-  ],[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','17:15','Carni · straordinario']],['Giulio','16:00','20:45','CR'],'Giorno basso: chiusura volutamente leggera CR + Marine'),
+    ['Stefano','06:00','13:00','Forno'],['Antonio','06:30','13:30','Ordini · Gastro mattina'],['Katia','07:00','14:00','Servizio mattina'],['Miriam','10:00','13:30','Rinforzo mattina · straordinario'],['Marine','13:30','20:45','Chiusura']
+  ],[['Gabriele','06:30','13:30','Macelleria']],['Giulio','16:00','20:45','CR chiusura'],'Gianmarco assente · chiusura CR + Marine'),
   '2026-09-10':refDay([
-    ['Katia','06:00','13:00','Gastro mattina'],['Stefano','07:30','13:30','Gastro mattina'],['Massimo','13:30','20:45','Chiusura'],['Marine','13:30','20:45','Chiusura']
-  ],[['Gabriele','07:00','12:00','Carni',{start2:'14:00',end2:'16:30'}]],['Giulio','08:00','14:00','CR'],'Maia: Generi Vari'),
+    ['Katia','06:00','13:00','Forno'],['Stefano','07:30','13:30','Ordini · Gastro mattina'],['Marine','13:30','20:45','Chiusura'],['Miriam','13:45','20:45','Chiusura']
+  ],[['Gabriele','07:00','12:00','Macelleria',{start2:'14:00',end2:'16:30'}]],['Giulio','07:00','13:00','CR mattina'],'Gianmarco assente · Maia a Generi Vari'),
   '2026-09-11':refDay([
-    ['Stefano','15:00','20:45','Chiusura'],['Massimo','14:00','20:45','Chiusura'],['Antonio','06:30','12:00','Gastro mattina'],['Marine','06:00','13:00','Gastro mattina'],['Miriam','09:30','14:00','Gastro mattina']
-  ],[['Katia','07:00','14:00','Supporto Carni'],['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:00','Carni pomeriggio']],['Giulio','06:00','12:00','CR'],'Maia: Generi Vari'),
+    ['Miriam','06:00','13:00','Forno'],['Antonio','06:30','13:30','Ordini · Gastro mattina'],['Massimo','09:30','13:30','Servizio',{start2:'16:30',end2:'20:45'}],['Stefano','13:30','20:45','Chiusura']
+  ],[['Gabriele','06:30','13:30','Macelleria'],['Katia','07:00','14:00','Vendita pesce'],['Marine','13:30','20:00','Vendita pesce pomeriggio']],['Giulio','06:00','10:30','CR',{start2:'12:00',end2:'15:30'}],'Gianmarco assente · Katia e Marine al Pesce · Maia a Generi Vari'),
   '2026-09-12':refDay([
-    ['Katia','14:30','20:45','Chiusura'],['Stefano','06:30','13:30','Gastro mattina'],['Antonio','06:00','13:00','Gastro mattina'],['Marine','14:30','20:45','Chiusura'],['Miriam','07:00','13:30','Gastro mattina']
-  ],[['Gabriele','06:30','13:30','Carni'],['Gianmarco','13:30','20:30','Carni pomeriggio']],['Giulio','11:00','13:30','CR',{start2:'15:30',end2:'20:45'}],'Maia: Generi Vari'),
+    ['Antonio','06:00','13:00','Forno'],['Stefano','06:30','13:30','Ordini · Gastro mattina'],['Miriam','07:00','14:00','Servizio mattina'],['Massimo','09:00','13:30','Rinforzo sabato'],['Marine','13:30','20:45','Chiusura'],['Katia','14:30','20:45','Chiusura']
+  ],[['Gabriele','06:30','13:30','Macelleria'],['Giulio','11:00','13:30','Macelleria · CR',{start2:'15:30',end2:'20:45'}]],null,'Gianmarco assente · Maia a Generi Vari · chiusura sabato Katia + Marine'),
   '2026-09-13':refDay([
     ['Stefano','07:00','13:15','Domenica'],['Miriam','07:00','13:15','Domenica']
   ],[],null,'Domenica: 2 addetti 07:00-13:15')
@@ -51,6 +45,7 @@ const PDV1_EXTERNAL_REFERENCE={
 };
 
 function inPdv1ReferenceDate(k){return k>=PDV1_REFERENCE_WEEK.from&&k<=PDV1_REFERENCE_WEEK.to}
+function pdv1ReferenceWeekActive(){return typeof pdv1Active==='function'&&pdv1Active()&&key(week)===PDV1_REFERENCE_WEEK.from}
 function migratePdv1ReferenceWeekState(){
   if(!(typeof currentPdvId==='function'&&currentPdvId()==='PDV_001'))return;
   if(S.referenceWeekMigration===PDV1_REFERENCE_WEEK.version)return;
@@ -120,7 +115,7 @@ function decorateReferenceSchedule(){
   if(ref&&!document.getElementById('referenceWeekCard')){
     const sections=[...app.querySelectorAll('section.card')],anchor=sections[0];
     const ext=Object.entries(PDV1_EXTERNAL_REFERENCE).map(([d,rows])=>rows.map(x=>`${d.slice(8,10)}/09 ${x.start}-${x.end}`).join('')).join(' · ');
-    const card=document.createElement('div');card.id='referenceWeekCard';card.className='card reference-week-card';card.innerHTML=`<div class="row wrap"><div><h3>Settimana modello reale · 7-13 settembre</h3><small>Orario pubblicato usato come riferimento per il PDV 349.</small></div><span class="pill">MODELLO</span></div><p><b>Maia → Generi Vari:</b> ${esc(ext)}</p><small class="muted">Le chiusure-aperture presenti nel modello restano visibili come eccezioni. Nelle settimane nuove il motore prova prima a evitarle.</small>`;
+    const card=document.createElement('div');card.id='referenceWeekCard';card.className='card reference-week-card';card.innerHTML=`<div class="row wrap"><div><h3>Orario pubblicato · 7-13 settembre</h3><small>Fonte: PDF aggiornato su Drive · ${esc(PDV1_REFERENCE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><p><b>Maia → Generi Vari:</b> ${esc(ext)}</p><small class="muted">Questo orario mostra la logica reale del negozio. Le chiusure-aperture necessarie restano ammesse ma sono evidenziate come eccezioni.</small>`;
     if(anchor)app.insertBefore(card,anchor);else app.appendChild(card);
   }
   [...app.querySelectorAll('section.card')].forEach((section,i)=>{
@@ -148,7 +143,7 @@ const pdvRulesBeforeReferenceModel=pdvRulesPage;
 pdvRulesPage=function(){
   pdvRulesBeforeReferenceModel();const p=pdvDb?.pdvs?.find(x=>x.id===(pdvRulesEditId||currentPdvId()))||currentPdv();if(!p||p.id!=='PDV_001')return;
   const form=document.querySelector('#app form'),actions=form?.lastElementChild;if(!form)return;
-  const html=`<div class="card"><h3>Modello reale PDV 349 · 7-13 settembre</h3><div class="req"><span>Chiusura-apertura</span><b>da evitare · eccezione evidenziata</b></div><div class="req"><span>Katia</span><b>evitare ancora di piu' chiusura-apertura</b></div><div class="req"><span>Mercoledi giorno basso</span><b>CR + 1 addetto in chiusura</b></div><div class="req"><span>Domenica</span><b>2 addetti · 07:00-13:15</b></div><div class="req"><span>Doppio turno lungo stesso giorno</span><b>non ammesso</b></div><small class="muted">Il modello guida le settimane future, ma nomi e rotazioni restano adattabili a ferie, permessi, competenze e ore disponibili.</small></div>`;actions?.insertAdjacentHTML('beforebegin',html);
+  const html=`<div class="card"><h3>Orario reale PDV 349 · 7-13 settembre</h3><div class="req"><span>Chiusura-apertura</span><b>da evitare · eccezione evidenziata</b></div><div class="req"><span>Katia</span><b>evitare ancora di piu' chiusura-apertura</b></div><div class="req"><span>Mercoledi giorno basso</span><b>CR + 1 addetto in chiusura</b></div><div class="req"><span>Domenica</span><b>2 addetti · 07:00-13:15</b></div><div class="req"><span>Doppio turno lungo stesso giorno</span><b>solo se operativo e segnalato</b></div><small class="muted">L'orario guida le settimane future, ma nomi e rotazioni restano adattabili a copertura, competenze, assenze e richieste.</small></div>`;actions?.insertAdjacentHTML('beforebegin',html);
 };
 
 (function installReferenceStyles(){

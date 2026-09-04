@@ -1,6 +1,6 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-03
+Ultimo aggiornamento: 2026-09-04
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
@@ -11,12 +11,14 @@ https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
 - Telegram usato per richieste, collegamenti addetti e coperture.
 - Nessun token, chiave amministratore o BOT_TOKEN deve essere salvato in GitHub.
 
-## Gerarchia regole
-1. Esigenze di reparto e competenze necessarie.
-2. Regole generali di pianificazione.
-3. Regole specifiche del singolo PDV.
-4. Regole/preferenze della singola persona.
-5. Richieste personali approvate o note ancora da approvare.
+## Gerarchia operativa
+1. Esigenze del negozio e copertura reale dei reparti.
+2. Competenze autonome richieste dalla mansione.
+3. Eventi, assenze, rientri e richieste approvate.
+4. Riposo preferito e alternanza delle chiusure del sabato.
+5. Monte ore e rotazione equa, usati solo tra alternative operative equivalenti.
+
+Questa gerarchia e una guida, non un insieme di regole ferree: quando due indicazioni sono in conflitto prevale il presidio del negozio. Le eccezioni restano visibili e devono essere controllate dal CR.
 
 ## Regole generali principali
 - Turno unico ordinario: fino a 7h15 di presenza con 15 min di pausa = 7h effettive.
@@ -34,14 +36,18 @@ https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
 - Mercoledì giorno basso: quando chiude il CR, CR + 1 addetto può essere sufficiente.
 - Massimo, Maia e Gianmarco non devono essere gli unici componenti della squadra di chiusura; deve esserci almeno una persona esterna al trio. Il CR conta come persona esterna.
 - Per Katia evitare il più possibile chiusura→apertura perché viene da lontano.
-- Settimana reale 07–13/09/2026 usata come modello operativo; domenica reale 13/09: Stefano + Miriam 07:00–13:15.
+- Orario pubblicato 07–13/09/2026 aggiornato dal PDF Drive del 04/09; domenica reale 13/09: Stefano + Miriam 07:00–13:15.
 - Maia è stata spostata ai Generi Vari nella settimana modello.
+- Forno: presenza autonoma dalle 06:00; una persona in formazione non sostituisce la copertura competente.
+- Carni/Pesce: macellaio al mattino, continuità rinforzata soprattutto venerdì e sabato; Pesce osservato il venerdì.
+- Chiusura: normalmente due persone; per inventario o altri eventi serve la terza. Il CR conta soltanto se copre davvero la fascia dell'evento.
+- Domenica osservata: due persone 07:00–13:15, con almeno una persona autonoma.
 
 ## Assenze / richieste
 - Una normale `richiesta` è solo promemoria `Da approvare`: non cambia turno, non ricalcola e non crea indisponibilità fino a comando esplicito.
 - 104 e permesso sindacale sono comunicazioni di diritto, non richieste da approvare: bloccano la pianificazione e avviano la ricerca copertura.
 - Malattia: blocca il periodo e alimenta i contatori; i turni già presenti diventano `SCOPERTO · da coprire per malattia`.
-- Gianmarco: malattia 02/09/2026–20/09/2026.
+- Gianmarco: malattia 02/09/2026–16/09/2026; rientro previsto il 17/09.
 - Miriam: 8h permesso sindacale 07/09/2026.
 - Marine: 8h permesso 104 08/09/2026.
 - Maia: richieste mattina libera 08/09, 14/09, 16/09, 23/09 tutte `Da approvare`.
@@ -74,7 +80,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part25.js`: 104/sindacale e coperture Telegram.
 - `orari-v9-part26.js`: separazione orari PDV / regole generali.
 - `orari-v9-part27.js`: limiti turno unico, spezzato, doppio lungo.
-- `orari-v9-part28.js`: settimana modello reale 07–13/09/2026.
+- `orari-v9-part28.js`: orario pubblicato 07–13/09/2026 aggiornato dal PDF Drive del 04/09.
 - `orari-v9-part29.js`: invio tabella per email.
 - `orari-v9-part30.js`: limite multi-turno giornaliero.
 - `orari-v9-part31.js`: malattia, contatori, griglia odierna e distribuzione ore lun/ven/sab.
@@ -82,7 +88,8 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part33.js`: griglia base ciclica, audit fabbisogni/competenze e segnalazione dei passaggi chiusura-apertura critici o borderline.
 - `orari-v9-part34.js`: alternanza intersettimanale delle chiusure del sabato; chi ha chiuso il sabato precedente viene sostituito o scambiato solo con personale competente e con riposi validi. Le eccezioni inevitabili restano evidenziate come borderline.
 - `orari-v9-part35.js`: prima bozza operativa 15-19/09 (Massimo, inventario e riassetto Katia); per la settimana pubblicata viene superata dai dati Drive del modulo successivo.
-- `orari-v9-part36.js`: settimana pubblicata 14-20/09/2026 importata dal PDF Drive del 03/09; domenica completata con Katia e Maia 07:00-13:15, formazione Forno di Maia esclusa dal monte ore operativo ma inclusa nelle ore personali, rientro previsto di Gianmarco il 17/09.
+- `orari-v9-part36.js`: settimana pubblicata 14-20/09/2026 importata dal PDF Drive del 03/09; domenica completata con Katia e Maia 07:00-13:15, tutte le 27 ore di formazione di Maia escluse dal monte ore operativo ma incluse nelle ore personali, rientro previsto di Gianmarco il 17/09.
+- `orari-v9-part37.js`: linee guida esigenze-prima ricavate dal confronto dei due orari pubblicati; aggiorna la gerarchia mostrata nella griglia e nella pagina regole.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.

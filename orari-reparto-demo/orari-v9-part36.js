@@ -1,6 +1,6 @@
 // Settimana pubblicata 14-20 settembre 2026, trascritta dal PDF caricato su Drive il 03/09/2026.
 // La domenica, assente nel PDF, usa il turno standard 07:00-13:15 comunicato dal CR.
-const PDV1_PUBLISHED_DRIVE_WEEK={from:'2026-09-14',to:'2026-09-20',version:'pdv1-drive-20260914-v1',publishedAt:'2026-09-03 19:40'};
+const PDV1_PUBLISHED_DRIVE_WEEK={from:'2026-09-14',to:'2026-09-20',version:'pdv1-drive-20260914-v2',publishedAt:'2026-09-03 19:40'};
 
 function publishedDriveEmployee(label){
   const target=String(label||'').trim().toLowerCase();
@@ -32,7 +32,7 @@ const PDV1_PUBLISHED_DRIVE_ROSTER={
     ['Miriam','06:00','13:00','Forno'],['Maia','06:00','13:00','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Katia','07:00','13:30','Gastro mattina'],['Stefano','09:00','14:00','Rinforzo sabato'],['Massimo','13:30','20:45','Chiusura'],['Antonio','13:30','20:45','Chiusura · straordinario']
   ],[['Gabriele','07:00','13:45','Macelleria mattina'],['Gianmarco','13:45','20:45','Macelleria pomeriggio']],['Giulio','06:00','11:00','CR mattina'],'Katia al mattino · Marine assente',['Marine']),
   '2026-09-20':publishedDriveDay([
-    ['Katia','07:00','13:15','Domenica · Servizio'],['Maia','07:00','13:15','Domenica · Servizio']
+    ['Katia','07:00','13:15','Domenica · Servizio'],['Maia','07:00','13:15','Domenica · Formazione',{trainingShift:true,excludeFromDepartmentHours:true}]
   ],[],null,'Domenica completata: Katia e Maia 07:00-13:15')
 };
 
@@ -109,7 +109,7 @@ function decoratePublishedDriveWeek(){
   if(view!=='schedule'||key(week)!==PDV1_PUBLISHED_DRIVE_WEEK.from)return;
   const app=document.getElementById('app'),hero=app?.querySelector('.purplebox');if(!app||!hero||document.getElementById('publishedDriveWeekCard'))return;
   const card=document.createElement('div');card.id='publishedDriveWeekCard';card.className='card published-drive-week-card';
-  card.innerHTML=`<div class="row wrap"><div><h3>Orario pubblicato · 14-20 settembre</h3><small>Fonte: PDF caricato su Drive · ${esc(PDV1_PUBLISHED_DRIVE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><div class="published-drive-facts"><span><b>Domenica</b>Katia + Maia · 07:00-13:15</span><span><b>Maia</b>20:45 formazione Forno fuori monte ore reparto</span><span><b>Gianmarco</b>rientro previsto giovedì 17</span></div><small class="muted">L’orario pubblicato ha precedenza sulla generazione automatica. Le chiusure-aperture critiche o borderline restano evidenziate.</small>`;
+  card.innerHTML=`<div class="row wrap"><div><h3>Orario pubblicato · 14-20 settembre</h3><small>Fonte: PDF caricato su Drive · ${esc(PDV1_PUBLISHED_DRIVE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><div class="published-drive-facts"><span><b>Domenica</b>Katia + Maia · 07:00-13:15</span><span><b>Maia</b>27:00 formazione fuori monte ore reparto, domenica compresa</span><span><b>Gianmarco</b>rientro previsto giovedì 17</span></div><small class="muted">L’orario pubblicato ha precedenza sulla generazione automatica. Le chiusure-aperture critiche o borderline restano evidenziate.</small>`;
   hero.insertAdjacentElement('afterend',card);
 }
 const scheduleBeforePublishedDriveWeek=schedule;
