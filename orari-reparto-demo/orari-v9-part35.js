@@ -108,6 +108,7 @@ function september19Assign(day,slot,employeeName,label){
 }
 function applyPdv1September17And18Plan(out){
   if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
+  if((out||[]).some(day=>day?.publishedDriveRoster))return out;
   const thursday=out.find(d=>key(d.date)==='2026-09-17');
   if(thursday&&thursday.holiday?.type!=='closed'){
     const shortClose=(thursday.g||[]).find(s=>s.start==='17:00'&&s.end===String(S.rules?.closingTime||'20:45'));
@@ -144,6 +145,7 @@ function applyPdv1September17And18Plan(out){
 function applyPdv1September19KatiaMorning(out){
   if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
   const day=out.find(d=>key(d.date)==='2026-09-19');if(!day||day.holiday?.type==='closed')return out;
+  if(day.publishedDriveRoster)return out;
   const close=String(S.rules?.closingTime||'20:45'),closers=(day.g||[]).filter(s=>String(s.end||'')===close).sort((a,b)=>mins(a.start)-mins(b.start));
   const desiredClosers=['Antonio','Miriam'];
   closers.slice(0,2).forEach((slot,index)=>{

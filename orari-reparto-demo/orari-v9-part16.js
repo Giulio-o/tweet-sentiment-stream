@@ -52,7 +52,7 @@ function pdv1349Metrics(s){
 }
 function pdv1349ApplyShiftRules(s){
   if(!s)return s;
-  if(String(s.skill||'').toLowerCase().includes('forno')&&s.start){
+  if(!s.publishedDriveShift&&String(s.skill||'').toLowerCase().includes('forno')&&s.start){
     s.start=PDV1_349_RULES.fornoStart;
     s.pdv1349Forno=true;
   }

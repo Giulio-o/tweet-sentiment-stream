@@ -11,6 +11,7 @@ function baseGridDayAssignments(day){
 }
 function baseGridRequiredSkill(shift,dep){
   if(dep==='cr')return'CR';
+  if(shift?.excludeFromDepartmentHours)return'Formazione';
   const text=String(shift?.skill||shift?.note||'').toLowerCase();
   if(text.includes('forno'))return'Forno';
   if(text.includes('ordini'))return'Ordini';
@@ -22,6 +23,7 @@ function baseGridRequiredSkill(shift,dep){
 function baseGridSkillOk(employee,required){
   if(!employee)return false;
   if(required==='CR')return Boolean(employee.cr);
+  if(required==='Formazione')return true;
   const level=Number(employee.skills?.[required]||0);
   if(required==='Forno'||required==='Ordini'||required==='Macelleria')return level>=2;
   if(required==='Pescheria')return level>=1;

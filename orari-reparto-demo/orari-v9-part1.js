@@ -56,6 +56,7 @@ function save(){localStorage.setItem(STORE,JSON.stringify(S))}
 function mins(t){const[a,b]=String(t).split(':').map(Number);return a*60+b}
 function hrs(a,b,p=0){return(mins(b)-mins(a)-p)/60}
 function dur(s){if(s.coveredByCR)return 0;return hrs(s.start,s.end,s.pause||0)+(s.start2?hrs(s.start2,s.end2):0)}
+function departmentDur(s){return s?.excludeFromDepartmentHours?0:dur(s)}
 function hf(v){const m=Math.max(0,Math.round((Number(v)||0)*60));return`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`}
 function parseHM(value){const v=String(value??'').trim().replace(',','.');if(!v)return 0;if(v.includes(':')){const[h,m]=v.split(':').map(Number);return Math.max(0,(h||0)+(m||0)/60)}return Math.max(0,Number(v)||0)}
 function dailyCredit(e){const h=Number(e.hours)||0;if(h===38)return 6+20/60;if(h===36)return 6;if(h===30)return 5;if(h===24)return 4;if(h===20)return 4;return Math.round(h/6*12)/12}

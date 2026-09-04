@@ -75,7 +75,7 @@ function linkedEmployeeForRequest(req){
 }
 function blockRange(period){
   if(period==='Mattina')return[0,13*60+30];
-  if(period==='Pomeriggio')return[13*60,18*60];
+  if(period==='Pomeriggio')return[13*60+30,18*60];
   if(period==='Sera')return[17*60,24*60];
   return[0,24*60];
 }

@@ -3,7 +3,7 @@
 const PDV1_REAL_STAFF_FALLBACK=[
   {name:'Giulio CR',hours:38,cr:true,dept:'misto',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:3,Pescheria:3}},
   {name:'Marine',hours:38,dept:'gastronomia',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:0,Pescheria:2}},
-  {name:'Katia ',hours:38,dept:'gastronomia',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:0,Pescheria:3}},
+  {name:'Katia ',hours:40,dept:'gastronomia',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:0,Pescheria:3}},
   {name:'Antonio',hours:24,dept:'gastronomia',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:0,Pescheria:1}},
   {name:'Miriam',hours:24,dept:'gastronomia',skills:{Forno:3,Ordini:3,Servizio:3,Macelleria:0,Pescheria:0}},
   {name:'Massimo',hours:20,dept:'gastronomia',skills:{Forno:0,Ordini:0,Servizio:3,Macelleria:0,Pescheria:0}},
