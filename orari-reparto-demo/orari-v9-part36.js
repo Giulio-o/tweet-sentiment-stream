@@ -1,6 +1,6 @@
-// Settimana pubblicata 14-20 settembre 2026, trascritta dal PDF caricato su Drive il 03/09/2026.
-// La domenica, assente nel PDF, usa il turno standard 07:00-13:15 comunicato dal CR.
-const PDV1_PUBLISHED_DRIVE_WEEK={from:'2026-09-14',to:'2026-09-20',version:'pdv1-drive-20260914-v2',publishedAt:'2026-09-03 19:40'};
+// Settimana pubblicata 14-20 settembre 2026, trascritta dall'ultimo PDF Drive del 05/09/2026.
+// Il file definitivo include anche domenica, vendite e compensazioni.
+const PDV1_PUBLISHED_DRIVE_WEEK={from:'2026-09-14',to:'2026-09-20',version:'pdv1-drive-20260914-v3',publishedAt:'2026-09-05 14:26'};
 
 function publishedDriveEmployee(label){
   const target=String(label||'').trim().toLowerCase();
@@ -8,28 +8,28 @@ function publishedDriveEmployee(label){
   return S.employees.find(e=>String(e.name||'').trim().toLowerCase()===target)?.name||label;
 }
 function publishedDriveShift(name,start,end,skill,extra={}){
-  return{name:publishedDriveEmployee(name),start,end,skill,pause:0,publishedDriveShift:true,source:'Drive · orario pubblicato 14-20 settembre',...extra};
+  return{name:publishedDriveEmployee(name),start,end,skill,pause:0,publishedDriveShift:true,source:'Drive · orario definitivo 14-20 settembre',...extra};
 }
 function publishedDriveDay(g=[],c=[],cr=null,note='',absences=[]){return{g,c,cr,note,absences}}
 
 const PDV1_PUBLISHED_DRIVE_ROSTER={
   '2026-09-14':publishedDriveDay([
-    ['Antonio','06:00','13:00','Forno'],['Katia','06:30','13:30','Ordini · Gastro mattina'],['Massimo','09:00','14:00','Servizio'],['Stefano','14:00','20:45','Chiusura'],['Miriam','14:30','20:45','Chiusura']
-  ],[['Gabriele','06:30','13:30','Macelleria']],['Giulio','06:00','12:30','CR mattina'],'Marine: assenza da orario pubblicato',['Marine']),
+    ['Antonio','06:00','13:00','Forno'],['Katia','06:30','13:30','Ordini · Gastro mattina'],['Massimo','07:00','10:30','Servizio · compensazione',{start2:'13:30',end2:'16:30'}],['Stefano','10:00','13:30','Servizio · chiusura',{start2:'16:00',end2:'20:45'}],['Miriam','14:30','20:45','Chiusura']
+  ],[['Gabriele','06:30','13:30','Macelleria']],['Giulio','06:00','12:30','CR mattina'],'Marine assente · vendite e compensazioni definitive',['Marine']),
   '2026-09-15':publishedDriveDay([
-    ['Stefano','06:00','13:00','Forno'],['Massimo','06:30','13:30','Gastro mattina'],['Katia','07:00','14:00','Ordini · Gastro mattina'],['Maia','06:00','12:45','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Antonio','14:00','20:45','Chiusura'],['Miriam','16:00','20:45','Chiusura']
+    ['Stefano','06:00','13:15','Forno'],['Massimo','06:30','13:30','Gastro mattina'],['Katia','07:00','14:00','Ordini · Gastro mattina'],['Maia','06:00','12:45','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Antonio','14:00','20:45','Chiusura'],['Miriam','16:00','20:45','Chiusura']
   ],[['Gabriele','07:00','13:30','Macelleria']],['Giulio','11:00','13:30','CR',{start2:'15:15',end2:'20:45'}],'Massimo libero nel pomeriggio · Marine assente',['Marine']),
   '2026-09-16':publishedDriveDay([
-    ['Stefano','06:00','13:00','Forno'],['Miriam','06:30','13:30','Ordini'],['Katia','13:30','20:45','Chiusura · Inventario'],['Massimo','13:30','20:45','Chiusura · Inventario'],['Antonio','16:00','20:45','Inventario Gastro-Forno · terza presenza anche fuori reparto',{inventoryShift:true,inventoryEventId:'inventory_quarterly_20260916'}]
+    ['Miriam','06:00','13:30','Forno'],['Stefano','06:30','12:00','Ordini · preparazione',{start2:'13:00',end2:'15:45'}],['Katia','13:30','20:45','Chiusura · Inventario'],['Massimo','15:45','20:45','Chiusura · Inventario'],['Antonio','16:00','20:45','Inventario Gastro-Forno · terza presenza slegata',{inventoryShift:true,inventoryEventId:'inventory_quarterly_20260916'}]
   ],[['Gabriele','07:00','14:00','Macelleria · Inventario carne-pesce']],['Giulio','06:30','11:15','CR',{start2:'12:30',end2:'15:30'}],'Inventario: Katia, Massimo e Antonio presenti fino alle 20:45 · Marine assente',['Marine']),
   '2026-09-17':publishedDriveDay([
-    ['Stefano','06:00','13:00','Forno'],['Massimo','06:30','13:30','Gastro mattina'],['Miriam','07:00','13:30','Ordini · Gastro mattina · straordinario'],['Katia','13:30','20:45','Chiusura'],['Gianmarco','13:30','20:45','Chiusura Gastro · rientro previsto',{returnExpected:true}]
+    ['Antonio','06:00','13:00','Forno'],['Massimo','06:30','13:30','Gastro mattina'],['Miriam','07:00','13:30','Ordini · Gastro mattina'],['Katia','13:30','20:45','Chiusura'],['Gianmarco','13:30','20:45','Chiusura Gastro · rientro previsto',{returnExpected:true}]
   ],[['Gabriele','07:00','12:00','Macelleria',{start2:'15:00',end2:'17:45'}]],['Giulio','16:00','20:45','CR chiusura'],'Rientro previsto di Gianmarco · Marine assente',['Marine']),
   '2026-09-18':publishedDriveDay([
-    ['Antonio','06:00','13:00','Forno'],['Maia','06:00','13:00','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Massimo','09:00','14:00','Servizio · straordinario'],['Stefano','14:00','20:45','Chiusura']
+    ['Antonio','06:00','13:00','Forno'],['Maia','06:00','13:00','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Massimo','09:00','14:00','Servizio · straordinario'],['Stefano','13:30','20:45','Chiusura']
   ],[['Gabriele','07:00','13:30','Macelleria'],['Katia','07:00','13:30','Vendita pesce'],['Gianmarco','13:30','20:00','Macelleria pomeriggio']],['Giulio','07:00','13:30','CR mattina'],'Katia al pesce 07:00-13:30 · Marine assente',['Marine']),
   '2026-09-19':publishedDriveDay([
-    ['Miriam','06:00','13:00','Forno'],['Maia','06:00','13:00','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Katia','07:00','13:30','Gastro mattina'],['Stefano','09:00','14:00','Rinforzo sabato'],['Massimo','13:30','20:45','Chiusura'],['Antonio','13:30','20:45','Chiusura · straordinario']
+    ['Miriam','06:00','13:00','Forno'],['Maia','06:00','13:00','Formazione Forno',{trainingShift:true,excludeFromDepartmentHours:true}],['Katia','07:00','13:30','Gastro mattina'],['Stefano','07:30','13:00','Rinforzo sabato',{start2:'14:00',end2:'16:45'}],['Massimo','09:30','13:30','Servizio · chiusura',{start2:'16:45',end2:'20:45'}],['Antonio','13:30','20:45','Chiusura · straordinario']
   ],[['Gabriele','07:00','13:45','Macelleria mattina'],['Gianmarco','13:45','20:45','Macelleria pomeriggio']],['Giulio','06:00','11:00','CR mattina'],'Katia al mattino · Marine assente',['Marine']),
   '2026-09-20':publishedDriveDay([
     ['Katia','07:00','13:15','Domenica · Servizio'],['Maia','07:00','13:15','Domenica · Formazione',{trainingShift:true,excludeFromDepartmentHours:true}]
@@ -109,7 +109,7 @@ function decoratePublishedDriveWeek(){
   if(view!=='schedule'||key(week)!==PDV1_PUBLISHED_DRIVE_WEEK.from)return;
   const app=document.getElementById('app'),hero=app?.querySelector('.purplebox');if(!app||!hero||document.getElementById('publishedDriveWeekCard'))return;
   const card=document.createElement('div');card.id='publishedDriveWeekCard';card.className='card published-drive-week-card';
-  card.innerHTML=`<div class="row wrap"><div><h3>Orario pubblicato · 14-20 settembre</h3><small>Fonte: PDF caricato su Drive · ${esc(PDV1_PUBLISHED_DRIVE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><div class="published-drive-facts"><span><b>Domenica</b>Katia + Maia · 07:00-13:15</span><span><b>Maia</b>27:00 formazione fuori monte ore reparto, domenica compresa</span><span><b>Gianmarco</b>rientro previsto giovedì 17</span></div><small class="muted">L’orario pubblicato ha precedenza sulla generazione automatica. Le chiusure-aperture critiche o borderline restano evidenziate.</small>`;
+  card.innerHTML=`<div class="row wrap"><div><h3>Orario definitivo · 14-20 settembre</h3><small>Fonte: ultimo PDF Drive · ${esc(PDV1_PUBLISHED_DRIVE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><div class="published-drive-facts"><span><b>Domenica</b>Katia + Maia · 07:00-13:15</span><span><b>Maia</b>27:00 formazione fuori monte ore reparto, domenica compresa</span><span><b>Gianmarco</b>rientro giovedì 17 · Marine assente</span></div><small class="muted">Sono comprese le ultime vendite e compensazioni. L’orario definitivo ha precedenza sulla generazione automatica; le eccezioni di riposo restano evidenziate.</small>`;
   hero.insertAdjacentElement('afterend',card);
 }
 const scheduleBeforePublishedDriveWeek=schedule;

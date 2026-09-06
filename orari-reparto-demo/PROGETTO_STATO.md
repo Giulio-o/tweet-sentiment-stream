@@ -1,6 +1,6 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-04
+Ultimo aggiornamento: 2026-09-06
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
@@ -37,11 +37,20 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 - Massimo, Maia e Gianmarco non devono essere gli unici componenti della squadra di chiusura; deve esserci almeno una persona esterna al trio. Il CR conta come persona esterna.
 - Per Katia evitare il più possibile chiusura→apertura perché viene da lontano.
 - Orario pubblicato 07–13/09/2026 aggiornato dal PDF Drive del 04/09; domenica reale 13/09: Stefano + Miriam 07:00–13:15.
+- Orario definitivo 14–20/09/2026 aggiornato dall'ultimo PDF Drive del 05/09 alle 14:26, comprese vendite e compensazioni; Marine assente, Gianmarco rientra il 17, Katia e Maia lavorano domenica 20.
 - Maia è stata spostata ai Generi Vari nella settimana modello.
 - Forno: presenza autonoma dalle 06:00; una persona in formazione non sostituisce la copertura competente.
 - Carni/Pesce: macellaio al mattino, continuità rinforzata soprattutto venerdì e sabato; Pesce osservato il venerdì.
 - Chiusura: normalmente due persone; per inventario o altri eventi serve la terza. Il CR conta soltanto se copre davvero la fascia dell'evento.
 - Domenica osservata: due persone 07:00–13:15, con almeno una persona autonoma.
+
+## Promozioni 01–14/10/2026
+- Fonte: `promo dal 1 al 14 ottobre.xlsx`, caricato su Drive il 05/09/2026.
+- 25 referenze: impatto maggiore su Carni (11) e Gastronomia (6), poi Pescheria (6) e Forneria (2).
+- Il numero di referenze non crea automaticamente ore: contano preparazione, servizio al banco/bilancia, quantità iniziali, vendite e rischio rottura stock.
+- Lancio 01–04/10: ordini entro 30/09, controllo esposizione il 01/10, rinforzo flessibile 09:00–13:00 venerdì/sabato per Carni e Gastro se i volumi lo richiedono.
+- Settimana piena 05–11/10: correggere ordini sul venduto del primo weekend e proteggere venerdì/sabato senza indebolire le chiusure.
+- Coda 12–14/10: mantenere il presidio fino a mercoledì e togliere gli eventuali rinforzi solo dopo verifica di residui e venduto.
 
 ## Assenze / richieste
 - Una normale `richiesta` è solo promemoria `Da approvare`: non cambia turno, non ricalcola e non crea indisponibilità fino a comando esplicito.
@@ -88,8 +97,9 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part33.js`: griglia base ciclica, audit fabbisogni/competenze e segnalazione dei passaggi chiusura-apertura critici o borderline.
 - `orari-v9-part34.js`: alternanza intersettimanale delle chiusure del sabato; chi ha chiuso il sabato precedente viene sostituito o scambiato solo con personale competente e con riposi validi. Le eccezioni inevitabili restano evidenziate come borderline.
 - `orari-v9-part35.js`: prima bozza operativa 15-19/09 (Massimo, inventario e riassetto Katia); per la settimana pubblicata viene superata dai dati Drive del modulo successivo.
-- `orari-v9-part36.js`: settimana pubblicata 14-20/09/2026 importata dal PDF Drive del 03/09; domenica completata con Katia e Maia 07:00-13:15, tutte le 27 ore di formazione di Maia escluse dal monte ore operativo ma incluse nelle ore personali, rientro previsto di Gianmarco il 17/09.
+- `orari-v9-part36.js`: settimana definitiva 14-20/09/2026 importata dall'ultimo PDF Drive del 05/09; include vendite, compensazioni e domenica, mantiene le 27 ore di formazione di Maia fuori dal monte ore operativo, Marine assente e Gianmarco dal 17/09.
 - `orari-v9-part37.js`: linee guida esigenze-prima ricavate dal confronto dei due orari pubblicati; aggiorna la gerarchia mostrata nella griglia e nella pagina regole.
+- `orari-v9-part38.js`: promozioni 01-14/10/2026 con impatto per reparto e indicazioni diverse per lancio, settimana piena e coda; nessun turno extra viene creato senza evidenza operativa.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.
