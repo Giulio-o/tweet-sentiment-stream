@@ -38,6 +38,7 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 - Per Katia evitare il più possibile chiusura→apertura perché viene da lontano.
 - Orario pubblicato 07–13/09/2026 aggiornato dal PDF Drive del 04/09; domenica reale 13/09: Stefano + Miriam 07:00–13:15.
 - Orario definitivo 14–20/09/2026 aggiornato dall'ultimo PDF Drive del 05/09 alle 14:26, comprese vendite e compensazioni; Marine assente, Gianmarco rientra il 17, Katia e Maia lavorano domenica 20.
+- Venerdì 18 l'orario pubblicato lascia un solo addetto fino alle 20:45 (Gianmarco termina alle 20:00): l'app mantiene il dato ma lo evidenzia come chiusura borderline da verificare.
 - Maia è stata spostata ai Generi Vari nella settimana modello.
 - Forno: presenza autonoma dalle 06:00; una persona in formazione non sostituisce la copertura competente.
 - Carni/Pesce: macellaio al mattino, continuità rinforzata soprattutto venerdì e sabato; Pesce osservato il venerdì.

@@ -61,6 +61,15 @@ function ensurePdv1PublishedDriveState(){
 function publishedDriveBuildShift(row,dep){
   const[name,start,end,skill,extra={}]=row;return publishedDriveShift(name,start,end,skill,{...extra,_dep:dep});
 }
+function annotatePublishedClosingCoverage(day){
+  if(!day||day.date?.getDay()===0)return;
+  const close=mins(String(S.rules?.closingTime||'20:45'));
+  const shifts=[...(day.g||[]),...(day.c||[]),...(day.cr?[day.cr]:[])];
+  const closers=shifts.filter(s=>shiftSegments(s).some(([,end])=>end>=close));
+  if(closers.length>=2)return;
+  day.publishedClosingWarning=`BORDERLINE CHIUSURA · ${closers.length} presenza fino alle ${String(S.rules?.closingTime||'20:45')} · verificare copertura`;
+  closers.forEach(s=>s.publishedClosingBorderline=true);
+}
 function applyPdv1PublishedDriveWeek(out){
   if(!(typeof pdv1Active==='function'&&pdv1Active()))return out;
   out.forEach(day=>{
@@ -69,6 +78,7 @@ function applyPdv1PublishedDriveWeek(out){
     day.c=(src.c||[]).map(row=>publishedDriveBuildShift(row,'c'));
     day.cr=src.cr?publishedDriveShift(src.cr[0],src.cr[1],src.cr[2],src.cr[3],{...(src.cr[4]||{}),note:src.cr[3],_dep:'cr'}):null;
     day.publishedDriveRoster=true;day.publishedDriveNote=src.note||'';day.publishedAbsences=(src.absences||[]).map(publishedDriveEmployee);
+    annotatePublishedClosingCoverage(day);
   });
   return out;
 }
@@ -82,10 +92,11 @@ build=function(){
 const shiftRowBeforePublishedDriveWeek=shiftRow;
 shiftRow=function(s,d,dep,i){
   let html=shiftRowBeforePublishedDriveWeek(s,d,dep,i);if(!s?.publishedDriveShift)return html;
-  html=html.replace('class="shift"','class="shift published-drive-shift"');
+  html=html.replace('class="shift','class="shift published-drive-shift');
   const notes=[];
   if(s.excludeFromDepartmentHours)notes.push('FORMAZIONE · conta nel contratto di Maia, esclusa dal monte ore reparto');
   if(s.returnExpected)notes.push('RIENTRO PREVISTO · Gianmarco dal 17 settembre');
+  if(s.publishedClosingBorderline)notes.push('BORDERLINE CHIUSURA · unico addetto fino alle 20:45');
   return notes.length?html.replace('</div><div class="time">',`<small class="published-drive-note">${esc(notes.join(' · '))}</small></div><div class="time">`):html;
 };
 
@@ -111,6 +122,11 @@ function decoratePublishedDriveWeek(){
   const card=document.createElement('div');card.id='publishedDriveWeekCard';card.className='card published-drive-week-card';
   card.innerHTML=`<div class="row wrap"><div><h3>Orario definitivo · 14-20 settembre</h3><small>Fonte: ultimo PDF Drive · ${esc(PDV1_PUBLISHED_DRIVE_WEEK.publishedAt)}</small></div><span class="pill">DRIVE</span></div><div class="published-drive-facts"><span><b>Domenica</b>Katia + Maia · 07:00-13:15</span><span><b>Maia</b>27:00 formazione fuori monte ore reparto, domenica compresa</span><span><b>Gianmarco</b>rientro giovedì 17 · Marine assente</span></div><small class="muted">Sono comprese le ultime vendite e compensazioni. L’orario definitivo ha precedenza sulla generazione automatica; le eccezioni di riposo restano evidenziate.</small>`;
   hero.insertAdjacentElement('afterend',card);
+  const ds=edited(build()),sections=[...app.querySelectorAll('section.card')];
+  ds.forEach((day,index)=>{
+    if(!day.publishedClosingWarning||!sections[index]||sections[index].querySelector('.published-closing-warning'))return;
+    sections[index].querySelector('.row')?.insertAdjacentHTML('afterend',`<div class="published-closing-warning"><b>${esc(day.publishedClosingWarning)}</b><span>Nel PDF di venerdì Gianmarco termina alle 20:00: il turno resta fedele al pubblicato, ma va controllato.</span></div>`);
+  });
 }
 const scheduleBeforePublishedDriveWeek=schedule;
 schedule=function(){scheduleBeforePublishedDriveWeek();decoratePublishedDriveWeek()};
@@ -122,7 +138,7 @@ if(typeof syncPdvCloudAuthoritative==='function'){
 
 (function installPublishedDriveWeekStyles(){
   if(document.getElementById('publishedDriveWeekStyles'))return;const st=document.createElement('style');st.id='publishedDriveWeekStyles';
-  st.textContent=`.published-drive-week-card{border-left:5px solid #1669a8;background:#eef7ff}.published-drive-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.published-drive-facts span,.published-training-summary{display:grid;gap:2px;padding:9px;border-radius:10px;background:#fff;border:1px solid #b7d5ea}.published-drive-shift{border-left:3px solid #5a9dca}.published-drive-note{display:block;margin-top:5px;padding:5px 7px;border-radius:8px;background:#e8f5ff;color:#14547e;font-size:.7rem;font-weight:800;line-height:1.25}.published-training-summary{margin:10px 0;background:#eef7ff;color:#154e73}@media(max-width:720px){.published-drive-facts{grid-template-columns:1fr}}`;
+  st.textContent=`.published-drive-week-card{border-left:5px solid #1669a8;background:#eef7ff}.published-drive-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.published-drive-facts span,.published-training-summary{display:grid;gap:2px;padding:9px;border-radius:10px;background:#fff;border:1px solid #b7d5ea}.published-drive-shift{border-left:3px solid #5a9dca}.published-drive-note{display:block;margin-top:5px;padding:5px 7px;border-radius:8px;background:#e8f5ff;color:#14547e;font-size:.7rem;font-weight:800;line-height:1.25}.published-training-summary{margin:10px 0;background:#eef7ff;color:#154e73}.published-closing-warning{display:grid;gap:3px;margin:8px 0;padding:8px 10px;border-radius:10px;background:#fff1dd;border:2px solid #d46a00;color:#7b3c00}.published-closing-warning span{font-size:.76rem}@media(max-width:720px){.published-drive-facts{grid-template-columns:1fr}}`;
   document.head.appendChild(st);
 })();
 
