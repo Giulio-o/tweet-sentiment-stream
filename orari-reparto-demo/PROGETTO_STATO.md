@@ -47,11 +47,9 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 
 ## Promozioni 01–14/10/2026
 - Fonte: `promo dal 1 al 14 ottobre.xlsx`, caricato su Drive il 05/09/2026.
-- 25 referenze: impatto maggiore su Carni (11) e Gastronomia (6), poi Pescheria (6) e Forneria (2).
-- Il numero di referenze non crea automaticamente ore: contano preparazione, servizio al banco/bilancia, quantità iniziali, vendite e rischio rottura stock.
-- Lancio 01–04/10: ordini entro 30/09, controllo esposizione il 01/10, rinforzo flessibile 09:00–13:00 venerdì/sabato per Carni e Gastro se i volumi lo richiedono.
-- Settimana piena 05–11/10: correggere ordini sul venduto del primo weekend e proteggere venerdì/sabato senza indebolire le chiusure.
-- Coda 12–14/10: mantenere il presidio fino a mercoledì e togliere gli eventuali rinforzi solo dopo verifica di residui e venduto.
+- 25 referenze mostrate come promemoria, raggruppate per Carni (11), Gastronomia (6), Pescheria (6) e Forneria (2).
+- Il promemoria appare soltanto nelle settimane che si sovrappongono al periodo 01–14/10.
+- Le promozioni non aggiungono ore e non modificano turni, fabbisogni, competenze o priorità del generatore.
 
 ## Assenze / richieste
 - Una normale `richiesta` è solo promemoria `Da approvare`: non cambia turno, non ricalcola e non crea indisponibilità fino a comando esplicito.
@@ -100,7 +98,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part35.js`: prima bozza operativa 15-19/09 (Massimo, inventario e riassetto Katia); per la settimana pubblicata viene superata dai dati Drive del modulo successivo.
 - `orari-v9-part36.js`: settimana definitiva 14-20/09/2026 importata dall'ultimo PDF Drive del 05/09; include vendite, compensazioni e domenica, mantiene le 27 ore di formazione di Maia fuori dal monte ore operativo, Marine assente e Gianmarco dal 17/09.
 - `orari-v9-part37.js`: linee guida esigenze-prima ricavate dal confronto dei due orari pubblicati; aggiorna la gerarchia mostrata nella griglia e nella pagina regole.
-- `orari-v9-part38.js`: promozioni 01-14/10/2026 con impatto per reparto e indicazioni diverse per lancio, settimana piena e coda; nessun turno extra viene creato senza evidenza operativa.
+- `orari-v9-part38.js`: promemoria delle promozioni attive 01-14/10/2026, senza alcun effetto su ore o generazione dei turni.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.
