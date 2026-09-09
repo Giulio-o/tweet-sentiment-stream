@@ -1,6 +1,6 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-06
+Ultimo aggiornamento: 2026-09-09
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
@@ -15,8 +15,8 @@ https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
 1. Esigenze del negozio e copertura reale dei reparti.
 2. Competenze autonome richieste dalla mansione.
 3. Eventi, assenze, rientri e richieste approvate.
-4. Riposo preferito e alternanza delle chiusure del sabato.
-5. Monte ore e rotazione equa, usati solo tra alternative operative equivalenti.
+4. Riposo preferito, bilanciamento aperture/chiusure e alternanza del sabato.
+5. Monte ore, rotazione ed equità degli straordinari, usati solo tra alternative operative equivalenti.
 
 Questa gerarchia e una guida, non un insieme di regole ferree: quando due indicazioni sono in conflitto prevale il presidio del negozio. Le eccezioni restano visibili e devono essere controllate dal CR.
 
@@ -29,12 +29,15 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 - Riposo preferito tra fine turno e inizio successivo: 12h. Chiusura→apertura è eccezione da evidenziare e minimizzare, non divieto assoluto.
 - Distribuire tutte le ore ordinarie per quanto possibile; le esigenze di reparto prevalgono.
 - A parità di copertura, privilegiare il recupero ore/allungamento turni lunedì, venerdì e sabato.
+- Dopo aver garantito copertura e competenze, evitare chiusure→aperture critiche tramite sostituzione o scambio equivalente; se non risolvibili, mantenerle evidenziate.
 
 ## PDV 1 / negozio 349
 - Chiusura negozio: 20:45.
 - Forno: ingresso 06:00.
 - Mercoledì giorno basso: quando chiude il CR, CR + 1 addetto può essere sufficiente.
-- Massimo, Maia e Gianmarco non devono essere gli unici componenti della squadra di chiusura; deve esserci almeno una persona esterna al trio. Il CR conta come persona esterna.
+- Massimo, Maia e Gianmarco, quando sono in chiusura Gastronomia, richiedono un addetto esperto non-CR. Se il loro turno di chiusura inizia alle 13:30, il supporto deve entrare entro le 14:00; il CR da solo non soddisfa questa esigenza.
+- Due chiusure settimanali per addetto sono il limite ordinario. La terza e ammessa solo come eccezione per esigenze di reparto e viene penalizzata considerando anche quante chiusure sono state fatte nella settimana precedente.
+- Tra alternative con la stessa copertura e competenza, gli straordinari vengono distribuiti sui part-time cercando una differenza massima di 4 ore tra il valore piu alto e quello piu basso. Se non e possibile, prevale il fabbisogno del reparto e lo scostamento resta visibile.
 - Per Katia evitare il più possibile chiusura→apertura perché viene da lontano.
 - Orario pubblicato 07–13/09/2026 aggiornato dal PDF Drive del 04/09; domenica reale 13/09: Stefano + Miriam 07:00–13:15.
 - Orario definitivo 14–20/09/2026 aggiornato dall'ultimo PDF Drive del 05/09 alle 14:26, comprese vendite e compensazioni; Marine assente, Gianmarco rientra il 17, Katia e Maia lavorano domenica 20.
@@ -99,6 +102,7 @@ Backend Apps Script deve essere distribuito nella versione che supporta queste a
 - `orari-v9-part36.js`: settimana definitiva 14-20/09/2026 importata dall'ultimo PDF Drive del 05/09; include vendite, compensazioni e domenica, mantiene le 27 ore di formazione di Maia fuori dal monte ore operativo, Marine assente e Gianmarco dal 17/09.
 - `orari-v9-part37.js`: linee guida esigenze-prima ricavate dal confronto dei due orari pubblicati; aggiorna la gerarchia mostrata nella griglia e nella pagina regole.
 - `orari-v9-part38.js`: promemoria delle promozioni attive 01-14/10/2026, senza alcun effetto su ore o generazione dei turni.
+- `orari-v9-part39.js`: supporto esperto non-CR alle chiusure di Massimo/Maia/Gianmarco in Gastronomia, supporto entro le 14:00 quando il turno parte alle 13:30, limite mobile di due chiusure e distribuzione degli straordinari part-time con obiettivo di scostamento massimo 4 ore.
 
 ## Regola di continuità
 In una nuova chat del progetto, leggere prima questo file e poi controllare gli ultimi moduli caricati dall'`index.html` prima di modificare il codice. Non affidarsi a ricostruzioni a memoria quando il repository contiene lo stato corrente.

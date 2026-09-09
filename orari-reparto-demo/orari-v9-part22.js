@@ -1,4 +1,5 @@
-// PDV 1 / 349: Massimo, Maia (Gaia) e Gianmarco non possono essere gli unici addetti in chiusura.
+// PDV 1 / 349: Massimo, Maia (Gaia) e Gianmarco in Gastronomia richiedono
+// un supporto di chiusura esperto diverso dal CR.
 const PDV1_WEAK_CLOSERS=new Set(['Massimo','Maia','Gaia','Gianmarco']);
 
 function pdv1ClosingShifts(day){
@@ -33,7 +34,10 @@ function applyPdv1SafeClosingTeam(out){
     if(index>5||day.holiday?.type==='closed')return;
     const closers=pdv1ClosingShifts(day).filter(s=>s.name&&s.name!=='SCOPERTO');
     if(!closers.length)return;
-    const hasSafeCloser=closers.some(s=>!PDV1_WEAK_CLOSERS.has(String(s.name||'').trim()));
+    const hasSafeCloser=closers.some(s=>{
+      const employee=S.employees.find(e=>e.name===s.name);
+      return !employee?.cr&&!PDV1_WEAK_CLOSERS.has(String(s.name||'').trim());
+    });
     if(hasSafeCloser)return;
 
     // Tutti i chiusuristi appartengono al gruppo Massimo/Maia/Gianmarco: sostituiamo uno di loro.
@@ -44,11 +48,11 @@ function applyPdv1SafeClosingTeam(out){
     if(replacement){
       const old=target.name;
       target.name=replacement.name;
-      target.skill=String(target.skill||'Chiusura')+` · regola squadra chiusura (al posto di ${old})`;
+      target.skill=String(target.skill||'Chiusura')+` · supporto esperto non-CR (al posto di ${old})`;
       target.safeClosingRule=true;
     }else{
       target.closingTeamWarning=true;
-      target.skill=String(target.skill||'Chiusura')+' · ATTENZIONE: manca un altro addetto esperto in chiusura';
+      target.skill=String(target.skill||'Chiusura')+' · ATTENZIONE: manca supporto esperto non-CR';
     }
   });
   return out;

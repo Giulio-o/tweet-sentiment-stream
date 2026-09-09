@@ -2,14 +2,14 @@
 // Sono priorita operative: la copertura del negozio prevale, mentre ore e rotazioni
 // decidono solo tra soluzioni che garantiscono lo stesso presidio.
 const PDV1_NEEDS_FIRST_GUIDE={
-  version:'pdv1-needs-first-20260904-v1',
-  source:'Drive · orari pubblicati 7-13 e 14-20 settembre',
+  version:'pdv1-needs-first-20260909-v2',
+  source:'Orari Drive 7-20 settembre · aggiornamento CR 09/09',
   priorities:[
     ['1','Negozio e reparti','Coprire le fasce necessarie prima di pareggiare ore o rotazioni.'],
     ['2','Competenze','Forno, Ordini, Macelleria e Pesce richiedono una persona autonoma.'],
     ['3','Eventi e assenze','Inventario, rientri, malattie e richieste approvate modificano la griglia.'],
-    ['4','Riposi e sabati','Evitare chiusura-apertura e due sabati in chiusura; se indispensabili, evidenziare.'],
-    ['5','Monte ore','Recuperi e straordinari si distribuiscono solo dopo aver messo in sicurezza il servizio.']
+    ['4','Riposi e chiusure','Due chiusure ordinarie; la terza e i sabati si valutano anche sulla settimana precedente.'],
+    ['5','Monte ore','Dopo la copertura, spalmare gli extra dei part-time con differenza obiettivo entro 4 ore.']
   ]
 };
 
@@ -18,7 +18,7 @@ function needsFirstPriorityBar(){
   return`<div class="base-grid-priority needs-first-priority"><b>Ordine di decisione</b>${PDV1_NEEDS_FIRST_GUIDE.priorities.map(x=>`<span>${esc(x[0])} · ${esc(x[1])}</span>`).join('')}</div>`;
 }
 function needsFirstGuideHtml(){
-  return`<div class="card needs-first-guide" id="needsFirstGuide"><div class="row wrap"><div><h3>Linee guida operative · esigenze prima</h3><small>${esc(PDV1_NEEDS_FIRST_GUIDE.source)}</small></div><span class="pill">GUIDA</span></div><div class="needs-first-list">${PDV1_NEEDS_FIRST_GUIDE.priorities.map(x=>`<div><b>${esc(x[0])}</b><span><strong>${esc(x[1])}</strong><small>${esc(x[2])}</small></span></div>`).join('')}</div><div class="needs-first-observed"><span><b>Aperture</b>Forno dalle 06:00 e presidio mattina con competenze autonome.</span><span><b>Carni / Pesce</b>Macelleria al mattino; continuità soprattutto ven-sab; Pesce il venerdì.</span><span><b>Chiusure</b>Di norma 2 persone; il terzo serve per eventi. Il CR conta solo se presente nella fascia.</span><span><b>Formazione</b>Le ore dell'allievo contano alla persona, non come copertura autonoma del reparto.</span><span><b>Domenica</b>Base osservata: 2 persone 07:00-13:15, con almeno una persona autonoma.</span><span><b>Eccezioni</b>Una chiusura-apertura necessaria non viene cancellata: resta marcata CRITICO/BORDERLINE.</span></div><small class="muted">Queste indicazioni guidano la proposta, ma non sono regole ferree: quando entrano in conflitto prevale il presidio reale del negozio.</small></div>`;
+  return`<div class="card needs-first-guide" id="needsFirstGuide"><div class="row wrap"><div><h3>Linee guida operative · esigenze prima</h3><small>${esc(PDV1_NEEDS_FIRST_GUIDE.source)}</small></div><span class="pill">GUIDA</span></div><div class="needs-first-list">${PDV1_NEEDS_FIRST_GUIDE.priorities.map(x=>`<div><b>${esc(x[0])}</b><span><strong>${esc(x[1])}</strong><small>${esc(x[2])}</small></span></div>`).join('')}</div><div class="needs-first-observed"><span><b>Aperture</b>Forno dalle 06:00 e presidio mattina con competenze autonome.</span><span><b>Carni / Pesce</b>Macelleria al mattino; continuità soprattutto ven-sab; Pesce il venerdì.</span><span><b>Chiusure Gastro</b>Massimo, Maia e Gianmarco richiedono un esperto non-CR; se iniziano alle 13:30, il supporto entra entro le 14:00.</span><span><b>Rotazione</b>Due chiusure sono la norma; la terza e un'eccezione valutata anche sul carico della settimana precedente.</span><span><b>Formazione</b>Le ore dell'allievo contano alla persona, non come copertura autonoma del reparto.</span><span><b>Straordinari PT</b>Tra soluzioni equivalenti si sceglie chi riduce la differenza, con obiettivo massimo di 4 ore.</span><span><b>Domenica</b>Base osservata: 2 persone 07:00-13:15, con almeno una persona autonoma.</span><span><b>Eccezioni</b>Le esigenze inevitabili non vengono cancellate: restano marcate CRITICO/BORDERLINE.</span></div><small class="muted">Queste indicazioni guidano la proposta, ma non sono regole ferree: quando entrano in conflitto prevale il presidio reale del negozio.</small></div>`;
 }
 
 if(typeof baseGridPanelHtml==='function'){
