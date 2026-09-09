@@ -73,6 +73,13 @@ function canStartEveningEarlier(out,index,s,minsToAdd){
   return true;
 }
 function extendPriorityShift(out,index,s,neededMinutes){
+  if(typeof pdv1Active==='function'&&pdv1Active()&&(s.fridayFishOnly||s.saturdayMorningSale)){
+    // Fasce di vendita: solo 07-13:30/14 oppure 09:30-13:30/09-14.
+    const probe={...s,start:s.saturdayMorningSale?'09:00':'07:00',end:'14:00'},added=shiftScheduledMinutes(probe)-shiftScheduledMinutes(s);
+    const employee=S.employees.find(e=>e.name===s.name);
+    if(added<=0||neededMinutes<added||!employee||!saturdayRotationCanAssign(out,index,employee,probe,[s]))return 0;
+    s.start=probe.start;s.end=probe.end;s.hoursDistributionExtension=added;return added;
+  }
   const maxPresence=Number(typeof dailyShiftRules==='function'?dailyShiftRules().singlePresenceMaxMinutes:435)||435;
   const scheduled=typeof shiftScheduledMinutes==='function'?shiftScheduledMinutes(s):Math.max(0,mins(s.end)-mins(s.start));
   let room=Math.max(0,maxPresence-scheduled),addMin=Math.min(room,neededMinutes,60);addMin=Math.floor(addMin/15)*15;if(addMin<15)return 0;

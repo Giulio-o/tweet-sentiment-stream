@@ -44,7 +44,8 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 - Venerdì 18 l'orario pubblicato lascia un solo addetto fino alle 20:45 (Gianmarco termina alle 20:00): l'app mantiene il dato ma lo evidenzia come chiusura borderline da verificare.
 - Maia è stata spostata ai Generi Vari nella settimana modello.
 - Forno: presenza autonoma dalle 06:00; una persona in formazione non sostituisce la copertura competente.
-- Carni/Pesce: macellaio al mattino, continuità rinforzata soprattutto venerdì e sabato; Pesce osservato il venerdì.
+- Ogni venerdì: vendita Pesce 07:00–13:30 oppure 07:00–14:00, affidata esclusivamente a Marine o Katia con competenza autonoma e conteggiata nelle ore Carni. La distribuzione ore non può estenderla alle 14:15/14:30. Se manca una soluzione compatibile resta SCOPERTO.
+- Sabato: rinforzo vendita straordinaria al mattino 09:30–13:30 oppure 09:00–14:00, come quinta presenza (compreso il CR se effettivamente presente); sostituisce il rinforzo generato 13:00–17:30, senza toccare le coperture di chiusura. La formazione non è copertura autonoma.
 - Chiusura: normalmente due persone; per inventario o altri eventi serve la terza. Il CR conta soltanto se copre davvero la fascia dell'evento.
 - Domenica osservata: due persone 07:00–13:15, con almeno una persona autonoma.
 

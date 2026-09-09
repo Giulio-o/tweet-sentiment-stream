@@ -13,7 +13,7 @@ function applyPdv1FridayFishOnly(out){
         fish.start='07:00';
         fish.end='13:30';
         fish.pause=15;
-        fish.skill='Vendita pesce · venerdì · priorità competenza 3→2';
+        fish.skill='Vendita pesce · venerdì · Carni · Marine/Katia';
         fish.fridayFishOnly=true;
       }
     }
@@ -31,8 +31,9 @@ pdvRulesPage=function(){
     const span=row.querySelector('span'),b=row.querySelector('b');
     if(!span||!b)return;
     const t=span.textContent||'';
-    if(t.includes('Venerdì mattina · Gastro/Forno + Pesce'))b.textContent='4 + 1 Pesce 07:00–13:30';
-    if(t.includes('Sabato mattina · Gastro/Forno + Pesce')){span.textContent='Sabato mattina · Gastro/Forno';b.textContent='4 · nessuna vendita Pesce'}
+    if(t==='Vendita Pesce')b.textContent='Marine o Katia · venerdì 07:00–13:30/14:00 · ore Carni';
+    if(t.includes('Venerdì mattina · Gastro/Forno + Pesce'))b.textContent='4 + 1 Pesce (Carni) · Marine/Katia 07:00–13:30 o 14:00';
+    if(t.includes('Sabato mattina · Gastro/Forno + Pesce')){span.textContent='Sabato mattina · Gastro/Forno';b.textContent='5 · vendita straordinaria 09:30–13:30 o 09:00–14:00'}
   });
 };
 try{render()}catch(_){}

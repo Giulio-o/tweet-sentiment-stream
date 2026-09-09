@@ -158,6 +158,7 @@ function pdv1OperationalSupportCandidate(out,index,previous){
 }
 function pdv1OperationalCanAssignIgnoring(out,index,employee,shift,ignore=[]){
   const day=out[index];if(!employee||employee.cr||leave(employee.name,day.date))return false;
+  if(shift.fridayFishOnly&&!['Marine','Katia'].includes(pdv1OperationalName(employee.name)))return false;
   if(typeof blockedAt==='function'&&shiftSegments(shift).some(([a,b])=>blockedAt(employee.name,day.date,toTime(a),toTime(b))))return false;
   if(typeof saturdayRotationCanAssign==='function')return saturdayRotationCanAssign(out,index,employee,shift,ignore);
   const ignored=new Set(ignore),others=pdv1OperationalDayEntries(day).map(x=>x.shift).filter(s=>!ignored.has(s)&&s.name===employee.name);
@@ -264,6 +265,7 @@ function pdv1RebalanceOperationalClosings(out,previous){
 }
 function pdv1OperationalSkillOk(employee,shift,dep){
   const required=typeof baseGridRequiredSkill==='function'?baseGridRequiredSkill(shift,dep):'Servizio';
+  if(shift.fridayFishOnly&&!['Marine','Katia'].includes(pdv1OperationalName(employee?.name)))return false;
   return typeof baseGridSkillOk==='function'?baseGridSkillOk(employee,required):Number(employee?.skills?.[required]||0)>0;
 }
 function pdv1ResolveOperationalCloseOpen(out){
@@ -294,9 +296,10 @@ function pdv1BalanceOperationalPartTimeOvertime(out){
     const counts=pdv1OperationalClosingCounts(out),highs=partTimes.filter(p=>p.extra>0).sort((a,b)=>b.extra-a.extra),moves=[];
     highs.forEach(high=>{
       (out||[]).forEach((day,index)=>{
-        if(day.referenceModel||day.publishedDriveRoster||day.date.getDay()===6||day.date.getDay()===0)return;
-        pdv1OperationalCountedClosingEntries(day).filter(x=>x.shift.name===high.name&&!x.shift.inventoryShift).forEach(target=>{
-          partTimes.filter(low=>low.name!==high.name&&(counts[pdv1OperationalName(low.name)]||0)<PDV1_OPERATIONAL_BALANCE_RULES.standardWeeklyClosings&&pdv1OperationalSkillOk(low,target.shift,target.dep)).filter(low=>pdv1OperationalCanTakeClosing(out,index,low,target.shift)).forEach(low=>{
+        if(day.referenceModel||day.publishedDriveRoster||day.date.getDay()===0)return;
+        pdv1OperationalDayEntries(day).filter(x=>x.dep!=='cr'&&x.shift.name===high.name&&!x.shift.inventoryShift&&!x.shift.trainingShift&&!x.shift.excludeFromDepartmentHours&&!(day.date.getDay()===6&&pdv1OperationalCloses(x.shift))).forEach(target=>{
+          const closing=pdv1OperationalCloses(target.shift);
+          partTimes.filter(low=>low.name!==high.name&&(!closing||(counts[pdv1OperationalName(low.name)]||0)<PDV1_OPERATIONAL_BALANCE_RULES.standardWeeklyClosings)&&pdv1OperationalSkillOk(low,target.shift,target.dep)).filter(low=>closing?pdv1OperationalCanTakeClosing(out,index,low,target.shift):pdv1OperationalCanAssignIgnoring(out,index,low,target.shift,[])).forEach(low=>{
             const hours=dur(target.shift),after=partTimes.map(p=>{let worked=Number(p.worked)||0;if(p.name===high.name)worked-=hours;if(p.name===low.name)worked+=hours;return{...p,extra:Math.max(0,worked-(Number(p.workTarget)||0)),missing:Math.max(0,(Number(p.workTarget)||0)-worked)}}),highAfter=after.find(p=>p.name===high.name),spread=pdv1OperationalExtraSpread(after);
             if((highAfter?.missing||0)>.75||spread>=currentSpread-.01)return;moves.push({target,day,index,high,low,spread,missing:highAfter?.missing||0});
           });
@@ -327,12 +330,49 @@ function pdv1OperationalAudit(out,previous=pdv1OperationalPreviousByWeek[key(wee
   return{supportIssues,closingCounts,thirdClosings,overtime,previous};
 }
 
+// La mansione pesce resta vincolata a Marine/Katia anche dopo le correzioni
+// generiche per riposi o assenze. Proviamo riassetti equivalenti, mai un nome
+// non autorizzato o una sovrapposizione nascosta.
+function pdv1RestoreFridaySale(out){
+  const index=4,day=out[index];if(!day||day.referenceModel||day.publishedDriveRoster||day.holiday?.type==='closed')return out;
+  let fish=(day.c||[]).find(s=>s.fridayFishOnly||/vendita pesce/i.test(String(s.skill||'')));
+  if(!fish){fish={name:'SCOPERTO',start:'07:00',end:'13:30',skill:'Vendita pesce · Carni · Marine/Katia',pause:15,fridayFishOnly:true};day.c.push(fish)}
+  fish.fridayFishOnly=true;fish.start='07:00';fish.end=mins(fish.end)>=840?'14:00':'13:30';delete fish.start2;delete fish.end2;
+  const allowed=S.employees.filter(e=>!e.cr&&['Marine','Katia'].includes(pdv1OperationalName(e.name))&&Number(e.skills?.Pescheria||0)>=2);
+  const current=allowed.find(e=>e.name===fish.name);
+  if(current&&pdv1OperationalCanAssignIgnoring(out,index,current,fish,[fish]))return out;
+  for(const candidate of allowed){
+    if(leave(candidate.name,day.date)||saturdayRotationBlocked(candidate,day,fish))continue;
+    const trial=out.map(d=>({...d,g:d.g.map(s=>({...s})),c:d.c.map(s=>({...s})),cr:d.cr?{...d.cr}:null}));
+    const target=trial[index].c[day.c.indexOf(fish)];target.name='SCOPERTO';
+    const conflicts=[];
+    pdv1OperationalDayEntries(trial[index-1]).filter(x=>x.dep!=='cr'&&x.shift.name===candidate.name).forEach(x=>{
+      const end=Math.max(...shiftSegments(x.shift).map(([,b])=>b));
+      if(1440-end+420<(Number(generalShiftRules().minimumRestMinutes)||720))conflicts.push({...x,dayIndex:index-1});
+    });
+    pdv1OperationalDayEntries(trial[index]).filter(x=>x.shift!==target&&x.shift.name===candidate.name).forEach(x=>conflicts.push({...x,dayIndex:index}));
+    let valid=true;
+    for(const item of conflicts){
+      if(trial[item.dayIndex].referenceModel||trial[item.dayIndex].publishedDriveRoster||item.shift.trainingShift||item.shift.inventoryShift){valid=false;break}
+      const replacement=S.employees.filter(e=>!e.cr&&e.name!==candidate.name&&pdv1OperationalSkillOk(e,item.shift,item.dep)).find(e=>pdv1OperationalCanAssignIgnoring(trial,item.dayIndex,e,item.shift,[item.shift])&&(!pdv1OperationalCloses(item.shift)||pdv1OperationalClosingTeamValid(trial[item.dayIndex],item.shift,e.name)));
+      if(!replacement){valid=false;break}
+      item.shift.name=replacement.name;
+    }
+    if(!valid||!pdv1OperationalCanAssignIgnoring(trial,index,candidate,target,[target]))continue;
+    target.name=candidate.name;target.skill='Vendita pesce · venerdì · Carni · Marine/Katia';
+    [index-1,index].forEach(i=>{out[i].g=trial[i].g;out[i].c=trial[i].c});return out;
+  }
+  // Una copertura non fattibile resta una scopertura esplicita.
+  fish.name='SCOPERTO';fish.skill='Vendita pesce · Carni · serve Marine o Katia · verificare disponibilità e riposo';return out;
+}
+
 const buildBeforePdv1OperationalBalance=build;
 build=function(){
   if(!pdv1OperationalBalanceActive())return buildBeforePdv1OperationalBalance();
   const previous=pdv1OperationalPreviousClosings(buildBeforePdv1OperationalBalance),weekKey=key(week);pdv1OperationalPreviousByWeek[weekKey]=previous;
   const oldContext=pdv1OperationalBuildContext;pdv1OperationalBuildContext={previous,closings:{},openings:{},dayClosers:{},load:null};
   let out;try{out=buildBeforePdv1OperationalBalance()}finally{pdv1OperationalBuildContext=oldContext}
+  pdv1RestoreFridaySale(out);
   pdv1ApplyOperationalClosingSupport(out,previous);pdv1RebalanceOperationalClosings(out,previous);pdv1ApplyOperationalClosingSupport(out,previous);pdv1ResolveOperationalCloseOpen(out);pdv1BalanceOperationalPartTimeOvertime(out);pdv1ApplyOperationalClosingSupport(out,previous);pdv1ApplyOperationalClosingQuota(out,previous);
   try{Object.defineProperty(out,'pdv1OperationalAudit',{value:pdv1OperationalAudit(out,previous),configurable:true})}catch(_){out.pdv1OperationalAudit=pdv1OperationalAudit(out,previous)}
   return out;
@@ -344,7 +384,9 @@ const editedBeforePdv1OperationalBalance=edited;
 edited=function(ds){
   ds=editedBeforePdv1OperationalBalance(ds);if(!pdv1OperationalBalanceActive())return ds;
   const previous=pdv1OperationalPreviousByWeek[key(week)]||{};
+  pdv1RestoreFridaySale(ds);
   pdv1ApplyOperationalClosingSupport(ds,previous);pdv1RebalanceOperationalClosings(ds,previous);pdv1ApplyOperationalClosingSupport(ds,previous);pdv1ResolveOperationalCloseOpen(ds);pdv1BalanceOperationalPartTimeOvertime(ds);pdv1ApplyOperationalClosingSupport(ds,previous);pdv1ApplyOperationalClosingQuota(ds,previous);
+  baseGridAuditWeek(ds);
   const audit=pdv1OperationalAudit(ds,previous);try{Object.defineProperty(ds,'pdv1OperationalAudit',{value:audit,configurable:true})}catch(_){ds.pdv1OperationalAudit=audit}
   return ds;
 };

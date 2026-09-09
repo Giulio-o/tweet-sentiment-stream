@@ -62,9 +62,9 @@ function pdv1FreePersonFromGastro(out,index,name,start,end){
   const day=out[index],a=mins(start),b=mins(end);
   (day.g||[]).filter(s=>s.name===name&&shiftSegments(s).some(([x,y])=>a<y&&b>x)).forEach(s=>{const old=s.name;s.name=pdv1ReplacementForShift(out,index,s,'g',[name]);s.skill=String(s.skill||'Turno')+` · riassegnato (priorità ${old})`})
 }
-function pdv1FishCandidate(out,index,start,end){
-  const cfg=pdv1Advanced(),day=out[index];
-  const byLevel=level=>S.employees.filter(e=>!e.cr&&Number(e.skills?.Pescheria||0)===level&&!leave(e.name,day.date)&&!pdv1LateBlockedFor(out,index,e,start)&&(!(typeof blockedAt==='function')||!blockedAt(e.name,day.date,start,end))).sort((a,b)=>rotationRank(a)-rotationRank(b));
+function pdv1FishCandidate(out,index,start,end,date=null){
+  const cfg=pdv1Advanced(),day=out[index]||{date};
+  const byLevel=level=>S.employees.filter(e=>!e.cr&&['Marine','Katia'].includes(String(e.name||'').trim())&&Number(e.skills?.Pescheria||0)===level&&!leave(e.name,day.date)&&!pdv1LateBlockedFor(out,index,e,start)&&(!(typeof blockedAt==='function')||!blockedAt(e.name,day.date,start,end))).sort((a,b)=>rotationRank(a)-rotationRank(b));
   const primary=byLevel(Number(cfg.fish.primarySkill)||3);if(primary.length)return primary[0];
   const fallback=byLevel(Number(cfg.fish.fallbackSkill)||2);return fallback[0]||null;
 }

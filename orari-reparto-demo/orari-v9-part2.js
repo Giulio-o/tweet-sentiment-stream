@@ -49,6 +49,9 @@ function build(){
     if(cr&&!leave(crName,d)){day.cr={name:crName,...cr};load[crName]=(load[crName]||0)+dur(day.cr)}
     const backup=i===5?staff('gastronomia').filter(e=>!leave(e.name,d)&&e.skills.Macelleria>=2).sort((a,b)=>(load[a.name]||0)-(load[b.name]||0))[0]:null;
     if(backup)reserved.push(backup.name);
+    // La vendita pesce viene prenotata prima delle mansioni Gastro.
+    const fridayFish=i===4&&typeof pdv1Active==='function'&&pdv1Active()?pdv1FishCandidate(out,i,'07:00','13:30',d):null;
+    if(fridayFish)reserved.push(fridayFish.name);
     if(i<6){
       const forno=pickPairedRole(rolePlan,'Forno',i,0,d,'06:15','13:00',used.concat(reserved));
       used.push(forno);push(day,'g',{name:forno,start:'06:15',end:'13:00',skill:'Forno',pause:0},load,mix,'morning');
@@ -72,8 +75,9 @@ function build(){
       if(i===5){
         const rinforzoMattina=chooseGastr('Servizio','morning',d,load,mix,used.concat(reserved));
         used.push(rinforzoMattina);push(day,'g',{name:rinforzoMattina,start:'09:30',end:'13:30',skill:'Rinforzo sabato',pause:0},load,mix,'morning');
-        const rinforzoPomeriggio=chooseGastr('Servizio','evening',d,load,mix,used.concat(reserved));
-        used.push(rinforzoPomeriggio);push(day,'g',{name:rinforzoPomeriggio,start:'13:00',end:'17:30',skill:'Rinforzo sabato',pause:0},load,mix,'evening');
+        const morningSale=typeof pdv1Active==='function'&&pdv1Active();
+        const rinforzoVendita=chooseGastr('Servizio',morningSale?'morning':'evening',d,load,mix,used.concat(reserved));
+        used.push(rinforzoVendita);push(day,'g',{name:rinforzoVendita,start:morningSale?'09:30':'13:00',end:morningSale?'13:30':'17:30',skill:morningSale?'Vendita straordinaria · quinto sabato mattina':'Rinforzo sabato',pause:0,saturdayMorningSale:morningSale},load,mix,morningSale?'morning':'evening');
       }
     }else{
       for(let j=0;j<2;j++){const n=chooseGastr('Servizio','morning',d,load,mix,used);used.push(n);push(day,'g',{name:n,start:'07:00',end:'13:30',skill:'Servizio gastronomia',pause:15},load,mix,'morning')}
@@ -82,7 +86,7 @@ function build(){
     }
     if(i<5){
       const arr=[[[ '06:30','13:30','Macelleria' ]],[[ '07:00','13:15','Macelleria' ]],[[ '06:30','13:30','Macelleria' ]],[[ '07:00','13:15','Macelleria' ]],[[ '06:30','13:30','Macelleria' ],[ '06:30','13:30','Vendita pesce · Gastronomia' ]]][i],cu=[];
-      arr.forEach(x=>{const fish=x[2].includes('pesce'),n=fish?chooseGastr('Pescheria','morning',d,load,mix,used):choose('Macelleria',d,load,cu,'carni');cu.push(n);push(day,'c',{name:n,start:x[0],end:x[1],skill:x[2],pause:hrs(x[0],x[1])>6?15:0},load,fish?mix:null,fish?'morning':null)})
+      arr.forEach(x=>{const fish=x[2].includes('pesce'),fixedFish=fish&&typeof pdv1Active==='function'&&pdv1Active(),n=fixedFish?(fridayFish?.name||'SCOPERTO'):fish?chooseGastr('Pescheria','morning',d,load,mix,used):choose('Macelleria',d,load,cu,'carni');cu.push(n);push(day,'c',{name:n,start:fixedFish?'07:00':x[0],end:x[1],skill:fixedFish?'Vendita pesce · Carni':x[2],pause:hrs(x[0],x[1])>6?15:0,fridayFishOnly:fixedFish},load,fish?mix:null,fish?'morning':null)})
     }else if(i===5){
       const main=staff('carni').filter(e=>!leave(e.name,d)&&e.skills.Macelleria>=2)[0];let morning,afternoon,crCover=false;
       if(swapSat()){afternoon=main?.name||'SCOPERTO';if(backup)morning=backup.name;else if(crCanMorning(day.cr)){morning=day.cr.name;crCover=true}else morning='SCOPERTO'}else{morning=main?.name||'SCOPERTO';afternoon=backup?.name||'SCOPERTO'}

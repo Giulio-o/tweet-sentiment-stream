@@ -26,7 +26,7 @@ function baseGridSkillOk(employee,required){
   if(required==='Formazione')return true;
   const level=Number(employee.skills?.[required]||0);
   if(required==='Forno'||required==='Ordini'||required==='Macelleria')return level>=2;
-  if(required==='Pescheria')return level>=1;
+  if(required==='Pescheria')return typeof pdv1Active==='function'&&pdv1Active()?level>=2&&['Marine','Katia'].includes(String(employee.name||'').trim()):level>=1;
   return Number(employee.skills?.Servizio||0)>0;
 }
 function baseGridShiftFirstStart(shift){
