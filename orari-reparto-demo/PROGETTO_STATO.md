@@ -1,6 +1,6 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-09
+Ultimo aggiornamento: 2026-09-11
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
@@ -56,6 +56,10 @@ Questa gerarchia e una guida, non un insieme di regole ferree: quando due indica
 - Le promozioni non aggiungono ore e non modificano turni, fabbisogni, competenze o priorità del generatore.
 
 ## Assenze / richieste
+- Pulsante `Libero / corso`: una data, addetto, causale Libero o Corso fuori sede, ore riconosciute modificabili anche a zero e nota facoltativa. Salva in `S.absences` con `dayStatus`, `fullDay:true`; usa la sincronizzazione esistente.
+- Le ore della giornata sono credito personale (colonna Corso/libero), non ore lavorate o copertura dei reparti. Riducono il target personale da assegnare in negozio. Un libero a zero ore blocca la data senza ridurre il target settimanale.
+- Sono disponibili modifica ed eliminazione. La stessa data/addetto viene aggiornata senza duplicare le ore. Ferie, malattia, spostamenti, altri permessi o crediti festivi già presenti bloccano un secondo inserimento sovrapposto.
+- Anche i turni manuali o pubblicati assegnati all'addetto nella data scelta diventano scoperture visibili; i dati originali non vengono cancellati. Il pianificatore assenze include queste giornate e non propone un addetto impegnato in corso o libero.
 - Una normale `richiesta` è solo promemoria `Da approvare`: non cambia turno, non ricalcola e non crea indisponibilità fino a comando esplicito.
 - 104 e permesso sindacale sono comunicazioni di diritto, non richieste da approvare: bloccano la pianificazione e avviano la ricerca copertura.
 - Malattia: blocca il periodo e alimenta i contatori; i turni già presenti diventano `SCOPERTO · da coprire per malattia`.
@@ -87,6 +91,7 @@ Flusso desiderato/implementato lato frontend:
 Backend Apps Script deve essere distribuito nella versione che supporta queste azioni.
 
 ## File moduli recenti
+- `orari-v9-part40.js`: libero/corso per una giornata, ore riconosciute, inserimento/modifica/eliminazione, blocco pianificazione e vista ore/griglia/addetto/esportazione.
 - `orari-v9-part23.js`: permessi, spostamenti, note richieste, regole a livelli.
 - `orari-v9-part24.js`: regole generali parametrizzate e riposo.
 - `orari-v9-part25.js`: 104/sindacale e coperture Telegram.
