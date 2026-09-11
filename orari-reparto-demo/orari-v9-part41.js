@@ -3,6 +3,16 @@
 const SEPT21_FROM='2026-09-21';
 function sept21Active(){return pdv1Active()&&key(week)===SEPT21_FROM}
 function sept21Name(name){return publishedDriveEmployee(name)}
+// Esclusione dal solo confronto distributivo: le ore personali restano visibili.
+const pdv1OperationalPartTimeBeforeSept21=pdv1OperationalPartTime;
+pdv1OperationalPartTime=function(e){return !(sept21Active()&&pdv1OperationalName(e?.name)==='Gianmarco')&&pdv1OperationalPartTimeBeforeSept21(e)};
+function ensureSept21Correction(){
+  if(!pdv1Active()||S.sept21Correction==='20260911-v2')return false;
+  const name=sept21Name('Gabriele');
+  S.absences=S.absences.filter(x=>!(x.name===name&&String(x.id||'').startsWith('sept21_abs_')&&x.date>=SEPT21_FROM&&x.date<='2026-09-27'));
+  if(!S.leaves.some(x=>x.name===name&&x.from<=SEPT21_FROM&&x.to>='2026-09-27'))S.leaves.push({name,from:SEPT21_FROM,to:'2026-09-27',source:'CR · ferie confermate 11/09/2026'});
+  S.sept21Correction='20260911-v2';return true;
+}
 const SEPT21_ROWS=[
   {g:[['Antonio','06:00','13:00','Forno'],['Katia','06:30','13:30','Ordini'],['Massimo','07:00','13:00','Servizio'],['Maia','13:30','20:45','Chiusura',{pause:15}],['Stefano','14:00','20:45','Supporto chiusura',{pause:15}]],c:[['Gianmarco','07:00','13:30','Macelleria']],cr:['Giulio','09:30','13:30','CR · reparto / Riunione Gastro fuori sede 14:30–17:30',{start2:'14:30',end2:'17:30',offsiteHours:3,operationalSegments:[['09:30','13:30']]}]},
   {g:[['Miriam','06:00','13:00','Forno'],['Antonio','06:30','13:30','Ordini'],['Massimo','07:00','13:00','Servizio'],['Katia','13:30','20:45','Chiusura',{pause:15}],['Maia','16:30','20:45','Chiusura']],c:[['Gianmarco','07:00','13:30','Macelleria']],cr:['Giulio','06:00','13:30','CR · reparto / Riunione Carni fuori sede 15:00–17:00',{pause:15,start2:'15:00',end2:'17:00',offsiteHours:2,operationalSegments:[['06:00','13:30']]}]},
@@ -13,7 +23,8 @@ const SEPT21_ROWS=[
   {g:[['Marine','07:00','13:15','Domenica · Servizio'],['Miriam','07:00','13:15','Domenica · Servizio']],c:[],cr:null}
 ];
 function ensureSept21State(){
-  if(!pdv1Active()||S.sept21Version==='20260911-v1')return false;
+  if(!pdv1Active())return false;
+  if(S.sept21Version==='20260911-v1')return ensureSept21Correction();
   ensureSpecialState();
   const abs=[{name:'Miriam',date:'2026-09-21',hours:0,type:'Libero',dayStatus:'off'},
     {name:'Stefano',date:'2026-09-22',hours:4,type:'Corso fuori sede',dayStatus:'course',note:'Primo soccorso 09:00–13:00 · fuori negozio per la giornata'},
@@ -26,7 +37,7 @@ function ensureSept21State(){
   });
   S.availabilityBlocks=S.availabilityBlocks||[];
   if(!S.availabilityBlocks.some(x=>x.name===sept21Name('Maia')&&x.date==='2026-09-23'))S.availabilityBlocks.push({requestId:'sept21_maia_morning',name:sept21Name('Maia'),date:'2026-09-23',period:'Mattina',source:'CR · richiesta preservata'});
-  S.sept21Version='20260911-v1';return true;
+  S.sept21Version='20260911-v1';ensureSept21Correction();return true;
 }
 const shiftSegmentsBeforeSept21=shiftSegments;
 shiftSegments=function(s){
@@ -45,7 +56,7 @@ function sept21Shift(row,dep){
 function sept21Build(){
   const ds=SEPT21_ROWS.map((row,i)=>({date:add(week,i),holiday:holidayFor(add(week,i)),g:row.g.map(x=>sept21Shift(x,'g')),c:row.c.map(x=>sept21Shift(x,'c')),cr:row.cr?sept21Shift(row.cr,'cr'):null,sept21:true}));
   ds[5].g.find(s=>s.saturdayMorningSale).skill='Rinforzo sabato mattina';
-  ds[5].g.push(sept21Shift(['SCOPERTO','09:30','13:30','Vendita straordinaria · quinta presenza autonoma',{saturdayMorningSale:true}],'g'));
+  ds[5].g.push(sept21Shift(['SCOPERTO','09:30','13:30','Vendita straordinaria · quinta presenza · CR sentirà altro negozio',{saturdayMorningSale:true}],'g'));
   ds.forEach(d=>{if(d.holiday?.type==='closed'){d.g=[];d.c=[];d.cr=null}});
   return ds;
 }
@@ -115,7 +126,7 @@ function sept21Summary(ds){
   const warnings=(ds.baseGridAudit?.closeOpen||[]).map(x=>`${esc(x.name)}: ${hf(x.gap/60)} di riposo (${x.severity==='critical'?'CRITICO':'BORDERLINE'})`).join(' · ');
   const uncovered=(ds.baseGridAudit?.uncovered||[]).map(x=>`${DAYS[x.dayIndex]} ${esc(x.shift.start)}–${esc(x.shift.end)} · ${esc(x.shift.skill)}`).join('<br>');
   const crRows=ds.map((d,i)=>{const items=baseGridDayAssignments(d).filter(x=>S.employees.find(e=>e.name===x.shift.name)?.cr);return items.length?`<li>${DAYS[i]}: ${items.map(({shift:s})=>`${esc(s.start)}–${esc(s.end)}${s.start2?' / '+esc(s.start2)+'–'+esc(s.end2):''} · ${esc(s.skill||s.note)}`).join('; ')}</li>`:''}).join('');
-  return`<section class="card sept21-summary"><h3>21–27 settembre · proposta eccezionale</h3><p>Turni CR da Calendar, aggiornati con le indicazioni dell’11 settembre. Riunioni fuori sede: lunedì 14:30–17:30, martedì 15:00–17:00; contano nelle ore personali, senza copertura del reparto.</p><ul>${crRows}</ul><p><b>Maia:</b> mattina del 23 libera; formazione ${hf(training)} esclusa dalle ore operative. I turni aggiuntivi contribuiscono agli straordinari personali.</p><p><b>Katia:</b> inserite 12 ore di permesso, provvisoriamente 6+6 il 23 e 24. Crediti modificabili nella gestione permessi.</p>${warnings?`<p class="bad"><b>Riposi da verificare:</b> ${warnings}. Le eccezioni non diventano regole per le altre settimane.</p>`:''}${uncovered?`<p class="bad"><b>Scoperture da gestire:</b><br>${uncovered}</p>`:''}<p>Maia in formazione e CR impegnato in Macelleria non sostituiscono una presenza autonoma in Gastro.</p><p><b>Ore da confermare:</b> credito dell’assenza di Marine e di Gabriele non indicato; i loro totali sono provvisori.</p><p class="${audit.overtime.within?'ok':'bad'}">Scostamento straordinari part-time: <b>${hf(audit.overtime.spread)}</b> (obiettivo 4:00). ${audit.overtime.within?'Obiettivo rispettato.':'Obiettivo non raggiunto con queste coperture: serve verificare un rinforzo.'}</p></section>`;
+  return`<section class="card sept21-summary"><h3>21–27 settembre · proposta eccezionale</h3><p>Turni CR da Calendar, aggiornati con le indicazioni dell’11 settembre. Riunioni fuori sede: lunedì 14:30–17:30, martedì 15:00–17:00; contano nelle ore personali, senza copertura del reparto.</p><ul>${crRows}</ul><p><b>Maia:</b> mattina del 23 libera; formazione ${hf(training)} esclusa dalle ore operative. I turni aggiuntivi contribuiscono agli straordinari personali.</p><p><b>Katia:</b> inserite 12 ore di permesso, provvisoriamente 6+6 il 23 e 24. Crediti modificabili nella gestione permessi.</p>${warnings?`<p class="bad"><b>Riposi da verificare:</b> ${warnings}. Le eccezioni non diventano regole per le altre settimane.</p>`:''}${uncovered?`<p class="bad"><b>Scoperture da gestire:</b><br>${uncovered}</p>`:''}<p>Maia in formazione e CR impegnato in Macelleria non sostituiscono una presenza autonoma in Gastro.</p><p><b>Ore da confermare:</b> resta da indicare il credito dell’assenza di Marine. Gabriele è in ferie dal 21 al 27 settembre.</p><p class="${audit.overtime.within?'ok':'bad'}">Gianmarco è escluso dal confronto: copre il full-time assente in Macelleria; le sue ore extra restano nel totale personale. Scostamento straordinari degli altri part-time: <b>${hf(audit.overtime.spread)}</b> (obiettivo 4:00). ${audit.overtime.within?'Obiettivo rispettato.':'Obiettivo non raggiunto con queste coperture: serve verificare un rinforzo.'}</p></section>`;
 }
 const hoursHtmlBeforeSept21=hoursHtml;
 hoursHtml=function(ds){return(ds.some(d=>d.sept21)?sept21Summary(ds):'')+hoursHtmlBeforeSept21(ds)};
