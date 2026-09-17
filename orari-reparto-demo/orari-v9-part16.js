@@ -52,7 +52,7 @@ function pdv1349Metrics(s){
 }
 function pdv1349ApplyShiftRules(s){
   if(!s)return s;
-  if(!s.publishedDriveShift&&String(s.skill||'').toLowerCase().includes('forno')&&s.start){
+  if(!s.publishedDriveShift&&/^forno(?:\s|$)/i.test(String(s.skill||''))&&s.start){
     s.start=PDV1_349_RULES.fornoStart;
     s.pdv1349Forno=true;
   }
@@ -117,6 +117,9 @@ function pdv1349NormalizeSkill(value,dep){
   const v=String(value||'').trim();
   if(!v)return dep==='c'?'Macelleria':'Servizio';
   const l=v.toLowerCase();
+  if(l.includes('chiusura')&&l.includes('forno'))return l.includes('scadenze')?'Chiusura forno + Scadenze':'Chiusura forno';
+  if(l.includes('scadenz'))return'Scadenze';
+  if(l.includes('rosticcer')||l.includes('gastronomia banco'))return'Rosticceria/gastronomia banco';
   if(l.includes('forno'))return'Forno';
   if(l.includes('ord'))return'Ordini';
   if(l.includes('mac'))return'Macelleria';

@@ -1,9 +1,26 @@
 # Orari Reparto — stato progetto
 
-Ultimo aggiornamento: 2026-09-11
+Ultimo aggiornamento: 2026-09-17
 
 ## Link app
 https://giulio-o.github.io/tweet-sentiment-stream/orari-reparto-demo/
+
+## Aggiornamento autorevole 17 settembre 2026
+Questa sezione e il modulo `orari-v9-part42.js` prevalgono sulle descrizioni storiche sotto.
+
+- Nuove competenze distinte: **Rosticceria/gastronomia banco**, **Scadenze**, **Chiusura forno**. Livelli inizialmente null (da confermare), mai copiati da Servizio/Forno o dedotti da un turno. Soglia operativa 2, coerente con le competenze esistenti.
+- Lun–sab: Forno 06:00–13:00; Rosticceria/gastronomia banco 06:30–13:30; Ordini 07:00–13:30.
+- Quarto addetto Servizio: lun/sab 08:00–14:00; mar–gio 09:30–14:00. **Venerdì non comunicato**, da completare nelle Regole PDV; non usare un turno eccezionale come regola generale.
+- Prima chiusura con controllo scadenze 13:30–20:45; seconda 14:30–20:45. Almeno uno dei due deve possedere **entrambe** Scadenze e Chiusura forno; il primo deve poter svolgere il controllo scadenze. Il CR impegnato in Carni non conta nello stesso intervallo anche in Gastro.
+- Decorrenza proposta 21/09/2026, modificabile nelle Regole. La domenica conserva le regole precedenti; il quinto rinforzo del sabato resta distinto dal quarto servizio.
+- Definitivo 14–20 aggiornato dalla foto Drive `1gUwMoCjwG92Y0Z5fv8cj5YGp1Aa8fZdl` del 17/09: presenza totale trascritta **349:15**, CR/altri reparti/formazione inclusi. Marine lavora lunedì 15:00–20:45; Miriam lunedì assente; rinforzi Maia mercoledì e giovedì, spezzati Massimo aggiornati, Miriam venerdì mattina.
+- Definitivo 21–27 aggiornato dalla foto Drive `1SNLhYp-PaNfOqqCDKtYFQjGKOk5iYzfC` del 17/09: presenza totale trascritta **320:15**. Questo sostituisce la proposta Calendar dell'11/09. Gianmarco lunedì 06:30–12:30 e sabato 13:30–20:00; Katia venerdì Pesce 07:00–14:15 (eccezione pubblicata, conservata); Giulio venerdì e sabato in Carni; rinforzi e formazione Maia aggiornati.
+- I 14 totali giornalieri della trascrizione coincidono con le due stampe. Non equiparare queste presenze al monte ore operativo/budget: gli obiettivi settimanali non sono stati dedotti dal totale stampato; pause/crediti restano voci separate.
+- Le mansioni non specificate nel foglio restano da confermare, soprattutto Rosticceria e la competenza di chiusura. La precedente classificazione della domenica di Maia come formazione è conservata: la dicitura straordinario non certifica autonomia.
+- I definitivi mantengono le persone e gli orari della fonte. Conflitti con assenze pregresse e competenze sono avvisi visibili, non sostituzioni automatiche del dato pubblicato. Le nuove proposte scelgono solo addetti disponibili/idonei e lasciano SCOPERTO quando mancano competenze confermate. Non presentare un definitivo con conflitti come già validato.
+- Migrazione una tantum: edit, edit CR, turni aggiunti e scelte copertura del 14–27 vengono archiviati integralmente in `S.salesImportArchive` prima di sostituire gli indici con il nuovo definitivo. Gli edit successivi restano applicabili. Assenze e crediti non vengono cancellati né inventati.
+- Le nuove fasce non passano nei vecchi riequilibri che ne cambiavano gli orari. Restano controlli di competenza, disponibilità, sovrapposizione, riposo e avvisi di durata; coperture manuali richiedono compatibilità. Le regole degli altri PDV restano nel generatore precedente.
+- Verifica riproducibile: `node tests/pdv1-sales.test.cjs`. Verificate anche inizializzazione e schermate Addetti/Regole/Orari/Vista addetto con DOM completo e rete disabilitata. Il salvataggio su Google Sheets richiede il collegamento Apps Script del dispositivo; non dichiararlo completato da una prova locale.
 
 ## Architettura
 - Frontend statico su GitHub Pages, cartella `orari-reparto-demo/`.
