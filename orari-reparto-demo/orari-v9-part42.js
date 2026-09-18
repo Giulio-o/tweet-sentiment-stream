@@ -220,6 +220,22 @@ todaySkillsGridHtml=function(ds){let html=todaySkillsBeforeSales(ds);if(!pdv1Act
 // Sostituire il vecchio pannello che descriveva ancora il PDF del 5 settembre.
 const decoratePublishedBeforeSales=decoratePublishedDriveWeek;
 decoratePublishedDriveWeek=function(){if(pdv1Active()&&salesSourceWeek())return;decoratePublishedBeforeSales()};
+const gridCellBeforeSales=baseGridEmployeeCell;
+baseGridEmployeeCell=function(day,employee){
+  const assigned=day.salesPublished?baseGridEmployeeShifts(day,employee):[];
+  if(!assigned.length)return gridCellBeforeSales(day,employee);
+  // Un'assenza pregressa in conflitto non deve nascondere il nuovo definitivo.
+  return`<td class="base-grid-cell ${assigned.some(x=>x.shift.baseGridSkillWarning)?'skill':''}">${assigned.map(({shift:s,dep})=>`<span class="base-grid-cell-shift"><b>${esc(s.start)}–${esc(s.end)}${s.start2?' / '+esc(s.start2)+'–'+esc(s.end2):''}</b><small>${esc(dep==='cr'?'CR':s.skill)}</small>${s.baseGridSkillWarning?`<small>${esc(s.baseGridSkillWarning)}</small>`:''}${s.baseGridCloseOpen?`<span class="base-grid-cell-alert">${esc(baseGridCloseOpenText(s.baseGridCloseOpen))}</span>`:''}</span>`).join('')}</td>`;
+};
+const employeePageBeforeSales=employeeWeekPage;
+employeeWeekPage=function(name){
+  employeePageBeforeSales(name);if(!pdv1Active()||!salesSourceWeek())return;
+  const ds=edited(build()),cards=[...document.querySelectorAll('#app .employee-day')];
+  cards.forEach((card,i)=>{const day=ds[i];if(!day)return;const shifts=employeeDayShifts(day,employeeWeekName);if(!shifts.length)return;
+    if(!card.querySelector('.employee-shift'))card.insertAdjacentHTML('beforeend',`<p><b>Turno nel definitivo Drive</b></p>${shifts.map(s=>employeeShiftHtml(s,day)).join('')}`);
+    const notes=shifts.map(s=>s.baseGridSkillWarning).filter(Boolean);if(notes.length)card.insertAdjacentHTML('beforeend',`<p class="bad">${notes.map(esc).join('<br>')}</p>`);
+  });
+};
 const hoursBeforeSales=hoursHtml;
 hoursHtml=function(ds){
   let html=hoursBeforeSales(ds);if(!pdv1Active()||!ds.some(d=>d.salesPublished||d.salesTemplate))return html;
