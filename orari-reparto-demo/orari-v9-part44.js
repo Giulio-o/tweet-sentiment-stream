@@ -26,7 +26,7 @@ function oct2026Apply(out,applyEdits=false){
     if(!src)continue;
     d.g=[];d.c=[];d.cr=null;
     for(const row of src.t){
-      const name=row[0],dep=name==='Giulio'?'cr':row[1]==='CARNI'?'c':'g';
+      const name=row[0],dep=row[1]==='CARNI'?'c':name==='Giulio'?'cr':'g';
       const shift=oct2026Shift(row,dep,date);
       if(dep==='cr'){if(d.cr){ // Più segmenti CR, se presenti
         d.cr.start2=shift.start;d.cr.end2=shift.end;
